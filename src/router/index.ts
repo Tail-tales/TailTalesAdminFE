@@ -9,12 +9,26 @@ import Chart from "../views/ChartView.vue";
 import Card from "../views/CardView.vue";
 import Blank from "../views/BlankView.vue";
 import NotFound from "../views/NotFound.vue";
+import SignUp from "../views/AppSignUp.vue";
+import RecoverPw from "../views/AppRecoverPassword.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
     path: "/",
     name: "Login",
     component: Login,
+    meta: { layout: "empty" },
+  },
+  {
+    path: "/signup",
+    name: "SignUp",
+    component: SignUp,
+    meta: { layout: "empty" },
+  },
+  {
+    path: "/recover-password",
+    name: "RecoverPassword",
+    component: RecoverPw,
     meta: { layout: "empty" },
   },
   {
