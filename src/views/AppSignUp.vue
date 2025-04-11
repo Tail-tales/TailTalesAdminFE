@@ -65,7 +65,7 @@
               "
               @click="checkIdDuplication"
               >
-              중복확인
+              check ID
             </button>
           </div>
           <p
