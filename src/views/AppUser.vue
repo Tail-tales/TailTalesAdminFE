@@ -2,10 +2,7 @@
     <div>
       <!-- Breadcrumb -->
       <Breadcrumb breadcrumb="User" />
-
-      <div class="mt-8">
-  
-        <div class="mt-6">
+        <div class="mt-5">
           <h2 class="text-xl font-semibold leading-tight text-gray-700">Users</h2>
   
           <div class="flex flex-col mt-3 sm:flex-row">
@@ -164,7 +161,7 @@
                       class="px-5 py-5 text-sm bg-white border-b border-gray-200"
                     >
                       <span
-                        :class="`relative inline-block px-3 py-1 font-semibold text-${u.statusColor}-900 leading-tight`"
+                        :class="`relative inline-block px-3 py-1 font-semibold text-${u.levelColor}-900 leading-tight`"
                       >
                         <span
                           aria-hidden
@@ -178,14 +175,14 @@
                     >
                       <div class="flex start">
                         <span class="text-yellow-500 flex justify-center">
-                          <a href="#" class="mx-2 px-2 py-1 rounded-md"
+                          <router-link :to="`/user/${u.id}`" class="mx-2 px-2 py-1 rounded-md"
                             ><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M2.15 1.25H13.875C14.775 1.25 15.525 1.975 15.525 2.875V10.325C15.525 11.225 14.8 11.95 13.875 11.95H12.15V14.75L9.525 11.95H2.15C1.25 11.95 0.5 11.225 0.5 10.325V2.875C0.5 1.975 1.225 1.25 2.15 1.25Z" fill="#4FD1D9"/>
                             <path d="M12 7.64999C12.5799 7.64999 13.05 7.17989 13.05 6.59999C13.05 6.02009 12.5799 5.54999 12 5.54999C11.4201 5.54999 10.95 6.02009 10.95 6.59999C10.95 7.17989 11.4201 7.64999 12 7.64999Z" fill="white"/>
                             <path d="M7.99995 7.64999C8.57985 7.64999 9.04995 7.17989 9.04995 6.59999C9.04995 6.02009 8.57985 5.54999 7.99995 5.54999C7.42005 5.54999 6.94995 6.02009 6.94995 6.59999C6.94995 7.17989 7.42005 7.64999 7.99995 7.64999Z" fill="white"/>
                             <path d="M3.99995 7.64999C4.57985 7.64999 5.04995 7.17989 5.04995 6.59999C5.04995 6.02009 4.57985 5.54999 3.99995 5.54999C3.42005 5.54999 2.94995 6.02009 2.94995 6.59999C2.94995 7.17989 3.42005 7.64999 3.99995 7.64999Z" fill="white"/>
                             </svg>
-                          </a>
+                          </router-link>
                           <form method="POST">
                             <button class="mx-2 px-2 rounded-md">
                               <svg
@@ -232,7 +229,6 @@
           </div>
         </div>
       </div>
-    </div>
   </template>
   
   <script setup lang="ts">
