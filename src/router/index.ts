@@ -13,6 +13,7 @@ import SignUp from "../views/AppSignUp.vue";
 import RecoverPw from "../views/AppRecoverPassword.vue";
 import User from "../views/AppUser.vue";
 import UserActivity from "../views/AppUserActivity.vue";
+import Board from "../views/AppBoard.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -43,6 +44,11 @@ const routes: Array<RouteRecordRaw> = [
     name: "UserActivity",
     component: UserActivity,
     props: true,
+  },
+  {
+    path: "/board",
+    name: "Board",
+    component: Board,
   },
   {
     path: "/dashboard",

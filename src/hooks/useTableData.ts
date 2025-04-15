@@ -18,12 +18,11 @@ export interface IPaginatedTableData {
 }
 
 export interface IWideTableData {
-  name: string;
-  email: string;
   title: string;
-  title2: string;
-  status: string;
-  role: string;
+  name: string;
+  count: number;
+  comments: number;
+  createdAt: string;
 }
 
 export function useTableData() {
@@ -97,12 +96,11 @@ export function useTableData() {
 
   const wideTableData = ref<IWideTableData[]>(
     [...Array(10).keys()].map(() => ({
-      name: 'John Doe',
-      email: 'john@example.com',
-      title: 'Software Engineer',
-      title2: 'Web dev',
-      status: 'Active',
-      role: 'Owner',
+      title: '안녕하세요 가입인사 드립니다',
+      name: '코코',
+      count: 10,
+      comments: 2,
+      createdAt: '2025-04-15',
     }))
   );
 
