@@ -1,12 +1,3 @@
----
-name: PULL_REQUEST_TEMPLATE
-about: Describe this issue template's purpose here.
-title: "[PR]"
-labels: PR
-assignees: ''
-
----
-
 # 📌 Pull Request Template
 
 ## 📄 작업한 기능을 선택해주세요
