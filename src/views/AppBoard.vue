@@ -119,7 +119,12 @@
               </thead>
 
               <tbody class="bg-white">
-                <tr v-for="(u, index) in wideTableData" :key="index">
+                <tr
+                  v-for="u in wideTableData"
+                  :key="u.id"
+                  class="cursor-pointer hover:bg-gray-100"
+                  @click="goToDetail(u.id)"
+                >
                   <td
                     class="px-6 py-4 border-b border-gray-200 whitespace-nowrap"
                   >
@@ -211,4 +216,12 @@
 import { useTableData } from '../hooks/useTableData'
 const { wideTableData } = useTableData()
 import Breadcrumb from '../partials/AppBreadcrumb.vue'
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+
+const goToDetail = (id: number) => {
+  router.push(`/board/${id}`);
+}
+
 </script>

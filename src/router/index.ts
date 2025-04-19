@@ -16,6 +16,7 @@ import UserActivity from "../views/AppUserActivity.vue";
 import Board from "../views/AppBoard.vue";
 import Category from "../views/AppCategory.vue";
 import Write from "../views/AppBoardWrite.vue";
+import BoardDetail from "../views/AppBoardDetail.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -51,6 +52,12 @@ const routes: Array<RouteRecordRaw> = [
     path: "/board",
     name: "Board",
     component: Board,
+  },
+  {
+    path: "/board/:id",
+    name: "BoardDetail",
+    component: BoardDetail,
+    props: true,
   },
   {
     path: "/board/write",

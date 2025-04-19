@@ -18,6 +18,7 @@ export interface IPaginatedTableData {
 }
 
 export interface IWideTableData {
+  id: number;
   title: string;
   name: string;
   count: number;
@@ -41,8 +42,8 @@ export function useTableData() {
       contact: 1012345678,
       role: '일반',
       created: 'Jan 21, 2020',
-      level: 'bear',
-      levelColor: 'blue',
+      level: 'Bear 🐻‍❄️',
+      levelColor: 'indigo',
     },
     { 
       id: 2,
@@ -53,7 +54,7 @@ export function useTableData() {
       contact: 1012345678,
       role: '일반',
       created: 'Jan 01, 2020',
-      level: 'bear',
+      level: 'Otter 🦦',
       levelColor: 'blue',
     },
     { 
@@ -65,7 +66,7 @@ export function useTableData() {
       contact: 1012345678,
       role: '일반',
       created: 'Jan 10, 2020',
-      level: 'lizard',
+      level: 'Dog 🐶',
       levelColor: 'green',
     },
     { 
@@ -77,8 +78,8 @@ export function useTableData() {
       contact: 1012345678,
       role: '펫시터',
       created: 'Jan 18, 2020',
-      level: 'lizard',
-      levelColor: 'green',
+      level: 'Parrot 🦜',
+      levelColor: 'yellow',
     },
     { 
       id: 5,
@@ -89,13 +90,14 @@ export function useTableData() {
       contact: 1012345678,
       role: '일반',
       created: 'Jan 21, 2020',
-      level: 'bear',
-      levelColor: 'blue',
+      level: 'Lizard 🦎',
+      levelColor: 'red',
     },
   ]);
 
   const wideTableData = ref<IWideTableData[]>(
-    [...Array(10).keys()].map(() => ({
+    Array(10).fill(null).map((_, index) => ({
+      id: index + 1,
       title: '안녕하세요 가입인사 드립니다',
       name: '코코',
       count: 10,
