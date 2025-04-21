@@ -11,6 +11,12 @@ import Blank from "../views/BlankView.vue";
 import NotFound from "../views/NotFound.vue";
 import SignUp from "../views/AppSignUp.vue";
 import RecoverPw from "../views/AppRecoverPassword.vue";
+import User from "../views/AppUser.vue";
+import UserActivity from "../views/AppUserActivity.vue";
+import Board from "../views/AppBoard.vue";
+import Category from "../views/AppCategory.vue";
+import Write from "../views/AppBoardWrite.vue";
+import BoardDetail from "../views/AppBoardDetail.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -30,6 +36,38 @@ const routes: Array<RouteRecordRaw> = [
     name: "RecoverPassword",
     component: RecoverPw,
     meta: { layout: "empty" },
+  },
+  {
+    path: "/user",
+    name: "User",
+    component: User,
+  },
+  {
+    path: "/user/:id",
+    name: "UserActivity",
+    component: UserActivity,
+    props: true,
+  },
+  {
+    path: "/board",
+    name: "Board",
+    component: Board,
+  },
+  {
+    path: "/board/:id",
+    name: "BoardDetail",
+    component: BoardDetail,
+    props: true,
+  },
+  {
+    path: "/board/write",
+    name: "Write",
+    component: Write,
+  },
+  {
+    path: "/category",
+    name: "Category",
+    component: Category,
   },
   {
     path: "/dashboard",
