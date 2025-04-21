@@ -104,13 +104,37 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import { useRouter, RouterLink } from "vue-router";
+import { useRouter } from "vue-router";
+import axios from "axios";
+import { useAuthStore } from "@/stores/auth";
 
 const router = useRouter();
-const id = ref("wldusdn01");
-const password = ref("wldusdn31!");
+const id = ref("");
+const password = ref("");
+const API_URL = "http://localhost:8080/auth/login"
+const errorMsg = ref("");
 
-function login() {
-  router.push("/dashboard");
+async function login() {
+  errorMsg.value = "";
+  try {
+    const response = await axios.post(API_URL, {
+      adminId : id.value,
+      password : password.value
+    })
+
+    if (response.status === 200){
+      const accessToken = response.data.accessToken;
+      if (accessToken) {
+        useAuthStore().loginSuccess(accessToken);
+        router.push("/dashboard");
+      } else{
+        errorMsg.value = "Access Token이 존재하지 않습니다.";
+      }
+    } else if (response.status == 403){
+      errorMsg.value = "아이디 또는 비밀번호가 일치하지 않습니다.";
+    }
+  } catch (error) {
+    errorMsg.value = "로그인 요청 중 오류가 발생했습니다."
+  }
 }
 </script>
