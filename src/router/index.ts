@@ -11,6 +11,8 @@ import Blank from "../views/BlankView.vue";
 import NotFound from "../views/NotFound.vue";
 import SignUp from "../views/AppSignUp.vue";
 import RecoverPw from "../views/AppRecoverPassword.vue";
+import User from "../views/AppUser.vue";
+import UserActivity from "../views/AppUserActivity.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -30,6 +32,17 @@ const routes: Array<RouteRecordRaw> = [
     name: "RecoverPassword",
     component: RecoverPw,
     meta: { layout: "empty" },
+  },
+  {
+    path: "/user",
+    name: "User",
+    component: User,
+  },
+  {
+    path: "/user/:id",
+    name: "UserActivity",
+    component: UserActivity,
+    props: true,
   },
   {
     path: "/dashboard",

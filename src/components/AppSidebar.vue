@@ -63,6 +63,23 @@
 
           <span class="mx-4">Dashboard</span>
         </router-link>
+
+        <router-link
+          class="flex items-center px-6 py-2 mt-4 duration-200 border-l-4"
+          :class="[$route.name === 'user' ? activeClass : inactiveClass]"
+        to="/user"
+        >
+          <svg 
+            class="w-5 h-5"
+            viewBox="0 0 24 24"
+            fill="none" 
+            xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 4C9.79086 4 8 5.79086 8 8C8 10.2091 9.79086 12 12 12C14.2091 12 16 10.2091 16 8C16 5.79086 14.2091 4 12 4Z" fill="currentColor"/>
+            <path d="M12 14C8.13401 14 5 17.134 5 21H19C19 17.134 15.866 14 12 14Z" fill="currentColor"/>
+          </svg>
+          <span class="mx-4">User</span>
+        </router-link>
+        
         <p class="pl-4 my-2 text-xs font-semibold mb-4 text-gray-400">
           Examples
         </p>
