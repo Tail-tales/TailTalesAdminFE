@@ -100,7 +100,7 @@
       </form>
     </div>
   </div>
-  <ToastAlert ref="toastAlert" @close="handleToastClose" />
+  <ToastAlert ref="toastAlert"/>
 </template>
 
 <script setup lang="ts">

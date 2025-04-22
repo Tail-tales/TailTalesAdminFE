@@ -101,25 +101,50 @@
 
         <label class="block mt-3">
           <span class="text-sm text-gray-700 font-bold">Email</span>
-          <input
-            class="
-              block
-              w-full
-              mt-1
-              border-b
-              border-gray-200
-              rounded-md
-              focus:border-indigo-600
-              focus:ring
-              focus:ring-opacity-40
-              focus:ring-indigo-500
+          <div class="flex">
+            <input
+              type="text"
+              class="
+                block
+                w-full
+                mt-1
+                border-b
+                border-gray-200
+                rounded-md
+                focus:border-indigo-600
+                focus:ring
+                focus:ring-opacity-40
+                focus:ring-indigo-500
+                "
+              :class="{ 'border-red-500': errors.email && errors.email !== '사용 가능한 이메일입니다.' ,  'border-green-500': errors.email === '사용 가능한 이메일입니다.'}"
+              placeholder="Email"
+              v-model="email"
+            />
+            <button
+              type="button"
+              class="
+                w-32
+                px-2
+                py-2
+                text-sm text-center text-white
+                bg-indigo-600
+                rounded-md
+                focus:outline-none
+                hover:bg-indigo-500
               "
-            :class="{ 'border-red-500': errors.email }"
-            placeholder="Email"
-            v-model="email"
-          />
-          <p class="mt-1 text-sm text-red-500" v-if="errors.email">{{ errors.email }}</p>
+              @click="checkEmailDuplication"
+              >
+              check email
+            </button>
+          </div>
+          <p
+          class="mt-1 text-sm" 
+          :class="{'text-red-500': errors.email !== '사용 가능한 이메일입니다.', 'text-green-500': errors.email === '사용 가능한 이메일입니다.'}"
+          v-if="errors.email"
+          >{{ errors.email }}
+        </p>
         </label>
+
         <label class="block mt-3">
           <span class="text-sm text-gray-700 font-bold">Phone Number</span>
           <input
@@ -170,13 +195,18 @@
       </form>
     </div>
   </div>
+  <ToastAlert ref="toastAlert"/>
 </template>
   
 <script setup lang="ts">
   import { ref, watch } from "vue";
   import { useRouter } from "vue-router";
+  import axios from "axios";
+  import ToastAlert from "@/components/ToastAlert.vue";
 
   const router = useRouter();
+  const API_URL = "http://localhost:8080/api/admins"
+  const toastAlert = ref<InstanceType<typeof ToastAlert> | null >(null);
 
   const name = ref("");
   const id = ref("");
@@ -193,6 +223,7 @@
   });
 
   const idCheckResult = ref(false);
+  const emailCheckResult = ref(false);
 
   type ErrorKeys = keyof typeof errors.value;
 
@@ -247,17 +278,42 @@
       return;
     }
 
-    // 서버랑 통신코드는 여기
+    try{
+      const params = { adminId : id.value }
+      const response = await axios.get(API_URL+'/check-id-duplication', { params })
 
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    const isDuplicate = Math.random() < 0.5; // 일단 임의로 중복 여부 결정
+      if ( response.data ) {
+        errors.value.id = "이미 사용 중인 아이디입니다.";
+        idCheckResult.value = false; 
+      } else{
+        errors.value.id = "사용 가능한 아이디입니다.";
+        idCheckResult.value = true; 
+      }
+    }catch(error){
+      toastAlert.value?.show('아이디 중복검사 중 오류가 발생했습니다.', 'error');
+    }
+  };
 
-    if (!isDuplicate) {
-      errors.value.id = "사용 가능한 아이디입니다.";
-      idCheckResult.value = true;
-    } else {
-      errors.value.id = "이미 사용 중인 아이디입니다.";
-      idCheckResult.value = false;
+  const checkEmailDuplication = async () => {
+    if (!email.value) {
+      errors.value.email = "아이디를 입력해주세요.";
+      emailCheckResult.value = false;
+      return;
+    }
+
+    try{
+      const params = { email : email.value }
+      const response = await axios.get(API_URL+'/check-email', { params })
+
+      if ( response.data ) {
+        errors.value.email = "이미 사용 중인 이메일입니다.";
+        emailCheckResult.value = false; 
+      } else{
+        errors.value.email = "사용 가능한 이메일입니다.";
+        emailCheckResult.value = true; 
+      }
+    }catch(error){
+      toastAlert.value?.show('이메일 중복검사 중 오류가 발생했습니다.', 'error');
     }
   };
 
@@ -280,8 +336,25 @@
     const hasErrors = Object.values(errors.value).some(error => error);
 
     if (!hasErrors && idCheckResult.value) {
-    router.push("/");
-    // 서버랑 통신코드는 여기
+      try {
+        const response = await axios.post(API_URL,{
+          name : name.value,
+          adminId : id.value,
+          password: password.value,
+          contact: phoneNumber.value,
+          email : email.value
+        })
+        console.log(response)
+        if( response.status === 200 ){
+          toastAlert.value?.show('회원가입이 완료되었습니다.', 'success');
+          router.push("/");
+        } else{
+          const errorMsg = response.data.trace 
+          toastAlert.value?.show(errorMsg, 'error')
+        }
+      } catch (error) {
+        toastAlert.value?.show('회원가입 요청 중 오류가 발생했습니다.', 'error');
+      }
   } else if (!idCheckResult.value && id.value && errors.value.id !== "아이디를 입력해주세요.") {
     errors.value.id = "중복 확인을 해주세요.";
   }
