@@ -100,6 +100,7 @@
       </form>
     </div>
   </div>
+  <ToastAlert ref="toastAlert" @close="handleToastClose" />
 </template>
 
 <script setup lang="ts">
@@ -107,15 +108,15 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
 import { useAuthStore } from "@/stores/auth";
+import ToastAlert from "@/components/ToastAlert.vue";
 
 const router = useRouter();
 const id = ref("");
 const password = ref("");
 const API_URL = "http://localhost:8080/auth/login"
-const errorMsg = ref("");
+const toastAlert = ref<InstanceType<typeof ToastAlert> | null >(null);
 
 async function login() {
-  errorMsg.value = "";
   try {
     const response = await axios.post(API_URL, {
       adminId : id.value,
@@ -128,13 +129,18 @@ async function login() {
         useAuthStore().loginSuccess(accessToken);
         router.push("/dashboard");
       } else{
-        errorMsg.value = "Access Token이 존재하지 않습니다.";
+        toastAlert.value?.show('Access Token이 존재하지 않습니다.', 'error');
       }
     } else if (response.status == 403){
-      errorMsg.value = "아이디 또는 비밀번호가 일치하지 않습니다.";
+      toastAlert.value?.show('아이디 또는 비밀번호가 일치하지 않습니다.', 'error');
     }
   } catch (error) {
-    errorMsg.value = "로그인 요청 중 오류가 발생했습니다."
+    toastAlert.value?.show('로그인 요청 중 오류가 발생했습니다.', 'error');
   }
+}
+
+function handleToastClose() {
+  console.log('Toast 알림이 닫혔습니다.');
+  // 필요하다면 닫힘 후 로직 처리
 }
 </script>
