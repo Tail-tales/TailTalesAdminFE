@@ -1,4 +1,5 @@
 module.exports = {
+  mode: 'jit',
   content: ['./public/**/*.html', './src/**/*.{vue,js,ts,jsx,tsx}'],
   presets: [],
   darkMode: 'media', // or 'class'
@@ -947,4 +948,16 @@ module.exports = {
     'disabled',
   ],
   plugins: [],
+  safelist: [
+    'bg-indigo-200',
+    'text-indigo-900',
+    'bg-blue-200',
+    'text-blue-900',
+    'bg-green-200',
+    'text-green-900',
+    'bg-yellow-200',
+    'text-yellow-900',
+    'bg-red-200',
+    'text-red-900',
+  ],
 }
