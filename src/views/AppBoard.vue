@@ -15,7 +15,6 @@
                 <option>자유게시판</option>
                 <option>이벤트</option>
                 <option>케어시트</option>
-                <option>시설</option>
               </select>
 
               <div
