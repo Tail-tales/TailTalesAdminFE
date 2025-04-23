@@ -1,7 +1,7 @@
 <template>
   <Breadcrumb breadcrumb="place" />
 
-  <h2 class="text-xl font-semibold leading-tight text-gray-700">글 작성</h2>
+  <h2 class="text-xl font-semibold leading-tight text-gray-700">시설 등록</h2>
 
   <div class="mt-5">
     <form @submit.prevent="submitForm" class="space-y-4">
@@ -14,16 +14,40 @@
           </option>
         </select>
       </div>
-      <div>
-        <input type="text" id="title" v-model="formData.title" placeholder="제목을 입력하세요" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+      <div class="flex items-center">
+        <input type="text" id="placeName" v-model="formData.placeName" placeholder="시설명을 입력하세요" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+      </div>
+      <div class="flex items-center">
+        <input type="text" id="roadAddress" v-model="formData.roadAddress" placeholder="주소를 입력하세요" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+        <button type="button" @click="openPostcodePopup" class="w-36 ml-2 px-4 py-2 font-medium tracking-wide text-white capitalize transition-colors duration-200 transform bg-indigo-600 rounded-md hover:bg-indigo-500 focus:outline-none focus:bg-indigo-500">주소 검색</button>
+      </div>
+      <div class="flex items-center">
+        <input type="text" id="detailAddress" v-model="formData.detailAddress" placeholder="상세주소를 입력하세요" required class="w-full shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+        <input type="text" id="postcode" v-model="formData.postcode" placeholder="우편번호" required class="ml-2 shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
       </div>
       <div>
-        <textarea id="content" v-model="formData.content" rows="10" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
+        <input type="text" id="contact" v-model="formData.contact" placeholder="연락처를 입력하세요" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
       </div>
+      <div>
+  <label class="block text-gray-700 text-sm font-bold mb-2">이용시간</label>
+  <div v-for="(day, index) in dayOptions" :key="index" class="flex items-center space-x-2 mb-1 justify-center mr-6">
+    <label :for="`startTime-${day.value}`" class="w-12 text-right text-gray-700 text-sm">{{ day.label }}</label>
+    <select :id="`startTime-${day.value}`" v-model="formData.hours[day.value].start" class="shadow appearance-none border rounded w-1/4 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+      <option value="" disabled>시작 시간</option>
+      <option v-for="time in timeOptions" :key="`start-${day.value}-${time}`" :value="time">{{ time }}</option>
+    </select>
+    <span class="text-gray-700">-</span>
+    <select :id="`endTime-${day.value}`" v-model="formData.hours[day.value].end" class="shadow appearance-none border rounded w-1/4 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+      <option value="" disabled>종료 시간</option>
+      <option v-for="time in timeOptions" :key="`end-${day.value}-${time}`" :value="time">{{ time }}</option>
+    </select>
+  </div>
+</div>
+
       <div class="bg-gray-100 p-2 rounded-md mb-4 flex items-center space-x-2">
         <label for="fileInput" class="flex items-center cursor-pointer">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
-            첨부파일
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+          첨부파일
         </label>
         <input type="file" id="fileInput" @change="handleFileChange" class="hidden" multiple>
         <div v-if="formData.files && formData.files.length > 0" class="mt-2">
@@ -40,7 +64,7 @@
       </div>
 
       <div class="flex justify-end space-x-2">
-        <button type="submit" class="px-4 py-2 font-medium tracking-wide text-white capitalize transition-colors duration-200 transform bg-indigo-600 rounded-md hover:bg-indigo-500 focus:outline-none focus:bg-indigo-500">완료</button>
+        <button type="submit" class="px-4 py-2 font-medium tracking-wide text-white capitalize transition-colors duration-200 transform bg-indigo-600 rounded-md hover:bg-indigo-500 focus:outline-none focus:bg-indigo-500">등록</button>
       </div>
     </form>
   </div>
@@ -48,7 +72,12 @@
 
 <script lang="ts" setup>
 import Breadcrumb from '../../partials/AppBreadcrumb.vue';
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
+
+interface PostcodeData {
+  roadAddress: string;
+  zonecode: string;
+}
 
 interface UploadedFile {
   file: File;
@@ -57,25 +86,46 @@ interface UploadedFile {
 }
 
 const categoryOptions = ref([
-  { value: 'notice', label: '공지' },
-  { value: 'free', label: '자유게시판' },
-  { value: 'question', label: '질문' },
+  { value: 'reptiles', label: '파충류' },
+  { value: 'amphibians', label: '양서류' },
+  { value: 'birds', label: '조류' },
 ]);
 
 const formData = ref({
   category: '',
-  title: '',
-  content: '',
-  files: [] as UploadedFile[], // 변경: 여러 파일 저장을 위한 배열
+  placeName: '',
+  postcode: '',
+  roadAddress: '',
+  detailAddress: '',
+  contact: '',
+  hours: {
+    monday: { start: '', end: '' },
+    tuesday: { start: '', end: '' },
+    wednesday: { start: '', end: '' },
+    thursday: { start: '', end: '' },
+    friday: { start: '', end: '' },
+    saturday: { start: '', end: '' },
+    sunday: { start: '', end: '' },
+  },
+  files: [] as UploadedFile[],
 });
+
+const dayOptions = ref([
+  { value: 'monday', label: '월' },
+  { value: 'tuesday', label: '화' },
+  { value: 'wednesday', label: '수' },
+  { value: 'thursday', label: '목' },
+  { value: 'friday', label: '금' },
+  { value: 'saturday', label: '토' },
+  { value: 'sunday', label: '일' },
+]);
+const timeOptions = ref(Array.from({ length: 25 }, (_, i) => i < 10 ? `0${i}:00` : `${i}:00`).slice(1));
 
 const handleFileChange = (event: Event) => {
   const target = event.target as HTMLInputElement;
   const files = Array.from(target.files || []);
-  formData.value.files = []; // 기존 파일 목록 초기화
-
   files.forEach((file: File) => {
-    const uploadedFile: UploadedFile = { file: file, name: file.name }; // 파일 이름 저장
+    const uploadedFile: UploadedFile = { file: file, name: file.name };
     formData.value.files.push(uploadedFile);
     if (file.type.startsWith('image/')) {
       uploadedFile.preview = URL.createObjectURL(file);
@@ -90,8 +140,31 @@ const removeFile = (index: number) => {
 const submitForm = () => {
   console.log(formData.value);
   alert('글이 작성되었습니다!');
-  formData.value.title = '';
-  formData.value.content = '';
-  formData.value.files = [];
+  // formData 초기화 로직 (필요하다면)
+};
+
+// 다음 우편번호 서비스 API 연동
+onMounted(() => {
+  if (!window.daum?.Postcode) {
+    const script = document.createElement('script');
+    script.src = 'https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
+    script.onload = () => {
+      console.log('Daum Postcode API Loaded');
+    };
+    document.head.appendChild(script);
+  }
+});
+
+const openPostcodePopup = () => {
+  if (window.daum?.Postcode) {
+    new window.daum.Postcode({
+      oncomplete: (data: PostcodeData) => {
+        formData.value.roadAddress = data.roadAddress;
+        formData.value.postcode = data.zonecode;
+      },
+    }).open();
+  } else {
+    alert('우편번호 서비스 로딩 중입니다. 잠시 후 다시 시도해주세요.');
+  }
 };
 </script>
