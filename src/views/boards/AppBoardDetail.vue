@@ -162,9 +162,9 @@
 </template>
 
 <script lang="ts" setup>
-import Breadcrumb from '../partials/AppBreadcrumb.vue';
+import Breadcrumb from '../../partials/AppBreadcrumb.vue';
 import { ref, computed } from 'vue';
-import LevelBadge from '../components/users/LevelBadge.vue';
+import LevelBadge from '../../components/users/LevelBadge.vue';
 
 interface FileInfo {
   name: string;

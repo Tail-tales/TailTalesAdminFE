@@ -34,8 +34,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import draggable from 'vuedraggable'
-import Breadcrumb from '../partials/AppBreadcrumb.vue'
-import CategoryItem from '../components/boards/CategoryItem.vue'
+import Breadcrumb from '../../partials/AppBreadcrumb.vue'
+import CategoryItem from '../../components/boards/CategoryItem.vue'
 
 interface Category {
   id: number

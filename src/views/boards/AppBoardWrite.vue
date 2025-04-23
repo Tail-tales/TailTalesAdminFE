@@ -47,7 +47,7 @@
 </template>
 
 <script lang="ts" setup>
-import Breadcrumb from '../partials/AppBreadcrumb.vue';
+import Breadcrumb from '../../partials/AppBreadcrumb.vue';
 import { ref } from 'vue';
 
 interface UploadedFile {
