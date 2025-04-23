@@ -3,20 +3,22 @@ import Dashboard from "../views/AppDashboard.vue";
 import Forms from "../views/AppForms.vue";
 import Tables from "../views/AppTables.vue";
 import UIElements from "../views/UIElements.vue";
-import Login from "../views/AppLogin.vue";
+import Login from "../views/auth/AppLogin.vue";
 import Modal from "../views/AppModal.vue";
 import Chart from "../views/ChartView.vue";
 import Card from "../views/CardView.vue";
 import Blank from "../views/BlankView.vue";
 import NotFound from "../views/NotFound.vue";
-import SignUp from "../views/AppSignUp.vue";
-import RecoverPw from "../views/AppRecoverPassword.vue";
+import SignUp from "../views/auth/AppSignUp.vue";
+import RecoverPw from "../views/auth/AppRecoverPassword.vue";
 import User from "../views/AppUser.vue";
 import UserActivity from "../views/AppUserActivity.vue";
-import Board from "../views/AppBoard.vue";
-import Category from "../views/AppCategory.vue";
-import Write from "../views/AppBoardWrite.vue";
-import BoardDetail from "../views/AppBoardDetail.vue";
+import Board from "../views/boards/AppBoard.vue";
+import Category from "../views/boards/AppCategory.vue";
+import BoardWrite from "../views/boards/AppBoardWrite.vue";
+import BoardDetail from "../views/boards/AppBoardDetail.vue";
+import Places from "../views/places/AppPlace.vue";
+import PlaceWrite from "../views/places/AppPlaceWrite.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -62,12 +64,28 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: "/board/write",
     name: "Write",
-    component: Write,
+    component: BoardWrite,
   },
   {
     path: "/category",
     name: "Category",
     component: Category,
+  },
+  {
+    path: "/places",
+    name: "Places",
+    component: Places,
+  },
+  // {
+  //   path: "/places/:id",
+  //   name: "PlaceDetail",
+  //   component: PlaceDetail,
+  //   props: true,
+  // },
+  {
+    path: "/places/write",
+    name: "PlaceWrite",
+    component: PlaceWrite,
   },
   {
     path: "/dashboard",
