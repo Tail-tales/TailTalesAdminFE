@@ -100,10 +100,9 @@
         </label>
 
         <label class="block mt-3">
-          <span class="text-sm text-gray-700 font-bold">Email</span>
-          <div class="flex">
+            <span class="text-sm text-gray-700 font-bold">Email</span>
             <input
-              type="text"
+              type="email"
               class="
                 block
                 w-full
@@ -115,35 +114,11 @@
                 focus:ring
                 focus:ring-opacity-40
                 focus:ring-indigo-500
-                "
-              :class="{ 'border-red-500': errors.email && errors.email !== '사용 가능한 이메일입니다.' ,  'border-green-500': errors.email === '사용 가능한 이메일입니다.'}"
+              "
               placeholder="Email"
               v-model="email"
             />
-            <button
-              type="button"
-              class="
-                w-32
-                px-2
-                py-2
-                text-sm text-center text-white
-                bg-indigo-600
-                rounded-md
-                focus:outline-none
-                hover:bg-indigo-500
-              "
-              @click="checkEmailDuplication"
-              >
-              check email
-            </button>
-          </div>
-          <p
-          class="mt-1 text-sm" 
-          :class="{'text-red-500': errors.email !== '사용 가능한 이메일입니다.', 'text-green-500': errors.email === '사용 가능한 이메일입니다.'}"
-          v-if="errors.email"
-          >{{ errors.email }}
-        </p>
-        </label>
+          </label>
 
         <label class="block mt-3">
           <span class="text-sm text-gray-700 font-bold">Phone Number</span>
@@ -201,7 +176,7 @@
 <script setup lang="ts">
   import { ref, watch } from "vue";
   import { useRouter } from "vue-router";
-  import axios from "axios";
+  import axios, { AxiosError } from "axios";
   import ToastAlert from "@/components/ToastAlert.vue";
 
   const router = useRouter();
@@ -223,7 +198,6 @@
   });
 
   const idCheckResult = ref(false);
-  const emailCheckResult = ref(false);
 
   type ErrorKeys = keyof typeof errors.value;
 
@@ -231,7 +205,7 @@
     name: [(v: string) => !!v || "이름을 입력해주세요."],
     id: [
     (v: string) => !!v || "아이디를 입력해주세요.",
-    (v: string) => !idCheckResult.value || true,
+    () => !idCheckResult.value || true,
     (v: string) => !v || idCheckResult.value || "중복 확인을 해주세요.",
   ],
     password: [
@@ -279,8 +253,8 @@
     }
 
     try{
-      const params = { adminId : id.value }
-      const response = await axios.get(API_URL+'/check-id-duplication', { params })
+      const adminId = id.value;
+      const response = await axios.get(`${API_URL}/exists/${adminId}`)
 
       if ( response.data ) {
         errors.value.id = "이미 사용 중인 아이디입니다.";
@@ -294,28 +268,6 @@
     }
   };
 
-  const checkEmailDuplication = async () => {
-    if (!email.value) {
-      errors.value.email = "아이디를 입력해주세요.";
-      emailCheckResult.value = false;
-      return;
-    }
-
-    try{
-      const params = { email : email.value }
-      const response = await axios.get(API_URL+'/check-email', { params })
-
-      if ( response.data ) {
-        errors.value.email = "이미 사용 중인 이메일입니다.";
-        emailCheckResult.value = false; 
-      } else{
-        errors.value.email = "사용 가능한 이메일입니다.";
-        emailCheckResult.value = true; 
-      }
-    }catch(error){
-      toastAlert.value?.show('이메일 중복검사 중 오류가 발생했습니다.', 'error');
-    }
-  };
 
   // 각 필드의 값이 변경될 때 유효성 검사 실행
   watch(name, (newValue) => validateField('name', newValue));
@@ -344,16 +296,18 @@
           contact: phoneNumber.value,
           email : email.value
         })
-        console.log(response)
         if( response.status === 200 ){
           toastAlert.value?.show('회원가입이 완료되었습니다.', 'success');
-          router.push("/");
-        } else{
-          const errorMsg = response.data.trace 
-          toastAlert.value?.show(errorMsg, 'error')
+          setTimeout(()=>{
+            router.push("/")
+          }, 3000)
         }
-      } catch (error) {
+      } catch (error: AxiosError) {
+        if (error.response.status === 500) {
+        toastAlert.value?.show(error.response.data.message, 'error');
+      } else {
         toastAlert.value?.show('회원가입 요청 중 오류가 발생했습니다.', 'error');
+      }
       }
   } else if (!idCheckResult.value && id.value && errors.value.id !== "아이디를 입력해주세요.") {
     errors.value.id = "중복 확인을 해주세요.";
