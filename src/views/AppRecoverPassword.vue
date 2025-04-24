@@ -10,11 +10,11 @@
           <label class="block">
             <span class="text-xl font-semibold text-gray-700">Forgot your password?</span>
             <p class="text-base mt-4 leading-5">
-              If you've forgotten your password, don't worry. Simply enter your email address below, and we'll send you an email
+              If you've forgotten your password, don't worry. Simply enter your id below, and we'll send you an email
               with a temporary password. Restoring access to your account has never been easier.
             </p>
             <input
-              type="email"
+              type="text"
               class="
                 block
                 w-full
@@ -26,7 +26,8 @@
                 focus:ring-opacity-40
                 focus:ring-indigo-500
               "
-              placeholder="Enter your Email"
+              placeholder="Enter your ID"
+              v-model="id"
             />
           </label>
   
@@ -78,20 +79,39 @@
         </form>
       </div>
     </div>
+    <ToastAlert ref="toastAlert"/>
   </template>
   
   <script setup lang="ts">
   import { ref } from "vue";
   import { useRouter } from "vue-router";
+  import ToastAlert from "@/components/ToastAlert.vue";
+  import axios, { AxiosError } from "axios";
+
   
   const router = useRouter();
+  const API_URL = "http://localhost:8080/auth/findPassword"
   const isLoading = ref(false);
+  const id = ref("");
+  const toastAlert = ref<InstanceType<typeof ToastAlert> | null >(null)
   
   async function findpw() {
     isLoading.value = true;
 
-    await new Promise ((resolve)=> setTimeout(resolve, 3000)); // 임시 딜레이
-    isLoading.value = false;
+    try {
+      const response = await axios.post(`${API_URL}?adminId=${id.value}`);
+      if( response.status === 200 ){
+        toastAlert.value?.show(response.data, 'success');
+        isLoading.value = false;
+      }
+    } catch (error: AxiosError) {
+      if (error.response && error.response.status === 404) {
+        toastAlert.value?.show("해당 아이디를 찾을 수 없습니다.", 'error');
+      } else {
+        toastAlert.value?.show('임시 비밀번호 전송 중 오류가 발생했습니다.', 'error');
+      }
+      isLoading.value = false;
+    }
   }
 
   function goBack() {
