@@ -74,6 +74,20 @@
 import Breadcrumb from '../../partials/AppBreadcrumb.vue';
 import { ref, onMounted } from 'vue';
 
+interface DaumPostcodeOptions {
+  oncomplete?: (data: PostcodeData) => void;
+}
+
+declare global {
+  interface Window {
+    daum?: {
+      Postcode?: new (options?: DaumPostcodeOptions) => {
+        open: () => void;
+      };
+    };
+  }
+}
+
 interface PostcodeData {
   roadAddress: string;
   zonecode: string;
@@ -85,13 +99,36 @@ interface UploadedFile {
   preview?: string;
 }
 
+interface FormData {
+  category: string;
+  placeName: string;
+  postcode: string;
+  roadAddress: string;
+  detailAddress: string;
+  contact: string;
+  hours: {
+    [key: string]: { // 인덱스 시그니처: 문자열 키를 가짐
+      start: string;
+      end: string;
+    };
+    monday: { start: string; end: string; };
+    tuesday: { start: string; end: string; };
+    wednesday: { start: string; end: string; };
+    thursday: { start: string; end: string; };
+    friday: { start: string; end: string; };
+    saturday: { start: string; end: string; };
+    sunday: { start: string; end: string; };
+  };
+  files: UploadedFile[];
+}
+
 const categoryOptions = ref([
   { value: 'reptiles', label: '파충류' },
   { value: 'amphibians', label: '양서류' },
   { value: 'birds', label: '조류' },
 ]);
 
-const formData = ref({
+const formData = ref<FormData>({
   category: '',
   placeName: '',
   postcode: '',
@@ -137,13 +174,12 @@ const removeFile = (index: number) => {
   formData.value.files.splice(index, 1);
 };
 
+//임시 작성 완료 함수
 const submitForm = () => {
   console.log(formData.value);
   alert('글이 작성되었습니다!');
-  // formData 초기화 로직 (필요하다면)
 };
 
-// 다음 우편번호 서비스 API 연동
 onMounted(() => {
   if (!window.daum?.Postcode) {
     const script = document.createElement('script');
