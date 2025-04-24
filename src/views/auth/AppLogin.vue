@@ -100,17 +100,43 @@
       </form>
     </div>
   </div>
+  <ToastAlert ref="toastAlert"/>
 </template>
 
 <script setup lang="ts">
 import { ref } from "vue";
-import { useRouter, RouterLink } from "vue-router";
+import { useRouter } from "vue-router";
+import axios from "axios";
+import { useAuthStore } from "@/stores/auth";
+import ToastAlert from "@/components/ToastAlert.vue";
 
 const router = useRouter();
-const id = ref("wldusdn01");
-const password = ref("wldusdn31!");
+const id = ref("");
+const password = ref("");
+const API_URL = "http://localhost:8080/auth/login"
+const toastAlert = ref<InstanceType<typeof ToastAlert> | null >(null);
 
-function login() {
-  router.push("/dashboard");
+async function login() {
+  try {
+    const response = await axios.post(API_URL, {
+      adminId : id.value,
+      password : password.value
+    })
+
+    if (response.status === 200){
+      const accessToken = response.data.accessToken;
+      if (accessToken) {
+        useAuthStore().loginSuccess(accessToken);
+        router.push("/dashboard");
+      } else{
+        toastAlert.value?.show('Access Token이 존재하지 않습니다.', 'error');
+      }
+    } else if (response.status == 403){
+      toastAlert.value?.show('아이디 또는 비밀번호가 일치하지 않습니다.', 'error');
+    }
+  } catch (error) {
+    toastAlert.value?.show('로그인 요청 중 오류가 발생했습니다.', 'error');
+  }
 }
+
 </script>

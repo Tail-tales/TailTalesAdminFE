@@ -65,7 +65,7 @@
               "
               @click="checkIdDuplication"
               >
-              중복확인
+              check ID
             </button>
           </div>
           <p
@@ -100,26 +100,26 @@
         </label>
 
         <label class="block mt-3">
-          <span class="text-sm text-gray-700 font-bold">Email</span>
-          <input
-            class="
-              block
-              w-full
-              mt-1
-              border-b
-              border-gray-200
-              rounded-md
-              focus:border-indigo-600
-              focus:ring
-              focus:ring-opacity-40
-              focus:ring-indigo-500
+            <span class="text-sm text-gray-700 font-bold">Email</span>
+            <input
+              type="email"
+              class="
+                block
+                w-full
+                mt-1
+                border-b
+                border-gray-200
+                rounded-md
+                focus:border-indigo-600
+                focus:ring
+                focus:ring-opacity-40
+                focus:ring-indigo-500
               "
-            :class="{ 'border-red-500': errors.email }"
-            placeholder="Email"
-            v-model="email"
-          />
-          <p class="mt-1 text-sm text-red-500" v-if="errors.email">{{ errors.email }}</p>
-        </label>
+              placeholder="Email"
+              v-model="email"
+            />
+          </label>
+
         <label class="block mt-3">
           <span class="text-sm text-gray-700 font-bold">Phone Number</span>
           <input
@@ -170,13 +170,18 @@
       </form>
     </div>
   </div>
+  <ToastAlert ref="toastAlert"/>
 </template>
   
 <script setup lang="ts">
   import { ref, watch } from "vue";
   import { useRouter } from "vue-router";
+  import axios, { AxiosError } from "axios";
+  import ToastAlert from "@/components/ToastAlert.vue";
 
   const router = useRouter();
+  const API_URL = "http://localhost:8080/api/admins"
+  const toastAlert = ref<InstanceType<typeof ToastAlert> | null >(null);
 
   const name = ref("");
   const id = ref("");
@@ -247,19 +252,22 @@
       return;
     }
 
-    // 서버랑 통신코드는 여기
+    try{
+      const adminId = id.value;
+      const response = await axios.get(`${API_URL}/exists/${adminId}`)
 
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    const isDuplicate = Math.random() < 0.5; // 일단 임의로 중복 여부 결정
-
-    if (!isDuplicate) {
-      errors.value.id = "사용 가능한 아이디입니다.";
-      idCheckResult.value = true;
-    } else {
-      errors.value.id = "이미 사용 중인 아이디입니다.";
-      idCheckResult.value = false;
+      if ( response.data ) {
+        errors.value.id = "이미 사용 중인 아이디입니다.";
+        idCheckResult.value = false; 
+      } else{
+        errors.value.id = "사용 가능한 아이디입니다.";
+        idCheckResult.value = true; 
+      }
+    }catch(error){
+      toastAlert.value?.show('아이디 중복검사 중 오류가 발생했습니다.', 'error');
     }
   };
+
 
   // 각 필드의 값이 변경될 때 유효성 검사 실행
   watch(name, (newValue) => validateField('name', newValue));
@@ -280,8 +288,27 @@
     const hasErrors = Object.values(errors.value).some(error => error);
 
     if (!hasErrors && idCheckResult.value) {
-    router.push("/");
-    // 서버랑 통신코드는 여기
+      try {
+        const response = await axios.post(API_URL,{
+          name : name.value,
+          adminId : id.value,
+          password: password.value,
+          contact: phoneNumber.value,
+          email : email.value
+        })
+        if( response.status === 200 ){
+          toastAlert.value?.show('회원가입이 완료되었습니다.', 'success');
+          setTimeout(()=>{
+            router.push("/")
+          }, 3000)
+        }
+      } catch (error: AxiosError) {
+        if (error.response.status === 500) {
+        toastAlert.value?.show(error.response.data.message, 'error');
+      } else {
+        toastAlert.value?.show('회원가입 요청 중 오류가 발생했습니다.', 'error');
+      }
+      }
   } else if (!idCheckResult.value && id.value && errors.value.id !== "아이디를 입력해주세요.") {
     errors.value.id = "중복 확인을 해주세요.";
   }
