@@ -200,7 +200,7 @@
     name: [(v: string) => !!v || "이름을 입력해주세요."],
     id: [
     (v: string) => !!v || "아이디를 입력해주세요.",
-    (v: string) => !idCheckResult.value || true,
+    () => !idCheckResult.value || true,
     (v: string) => !v || idCheckResult.value || "중복 확인을 해주세요.",
   ],
     password: [
