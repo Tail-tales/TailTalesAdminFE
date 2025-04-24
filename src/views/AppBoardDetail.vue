@@ -14,15 +14,7 @@
         <div class="ml-4">
           <div class="text-sm font-medium leading-5 text-gray-900">
             코코
-            <span
-              :class="`relative inline-block px-3 py-1 font-semibold text-indigo-900 leading-tight`"
-            >
-              <span
-                aria-hidden
-                :class="`absolute inset-0 bg-indigo-200 opacity-50 rounded-full`"
-              ></span>
-              <span class="relative">Bear 🐻‍❄️</span>
-            </span>
+            <LevelBadge level="Bear 🐻‍❄️" levelColor="indigo" />
           </div>
           <div class="text-sm leading-5 text-gray-500">
             2025-04-15
@@ -172,6 +164,7 @@
 <script lang="ts" setup>
 import Breadcrumb from '../partials/AppBreadcrumb.vue';
 import { ref, computed } from 'vue';
+import LevelBadge from '../components/users/LevelBadge.vue';
 
 interface FileInfo {
   name: string;

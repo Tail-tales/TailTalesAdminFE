@@ -160,15 +160,7 @@
                     <td
                       class="px-5 py-5 text-sm bg-white border-b border-gray-200"
                     >
-                      <span
-                        :class="`relative inline-block px-3 py-1 font-semibold text-${u.levelColor}-900 leading-tight`"
-                      >
-                        <span
-                          aria-hidden
-                          :class="`absolute inset-0 bg-${u.levelColor}-200 opacity-50 rounded-full`"
-                        ></span>
-                        <span class="relative">{{ u.level }}</span>
-                      </span>
+                    <LevelBadge :level="u.level" :levelColor="u.levelColor" />
                     </td>
                     <td
                       class="px-5 py-5 text-sm bg-white border-b border-gray-200"
@@ -235,5 +227,7 @@
   import { useTableData } from '../hooks/useTableData'
   const { paginatedTableData } = useTableData()
   import Breadcrumb from '../partials/AppBreadcrumb.vue'
+  import LevelBadge from '../components/users/LevelBadge.vue'
+
   </script>
   
