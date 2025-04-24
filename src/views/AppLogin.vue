@@ -139,8 +139,4 @@ async function login() {
   }
 }
 
-function handleToastClose() {
-  console.log('Toast 알림이 닫혔습니다.');
-  // 필요하다면 닫힘 후 로직 처리
-}
 </script>
