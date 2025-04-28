@@ -205,6 +205,13 @@
               </tbody>
             </table>
           </div>
+          <div class="flex justify-center mt-4">
+            <PaginationItem
+              :total-items="100"
+              :items-per-page="10"
+              :max-visible-pages="5"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -216,6 +223,7 @@ import { useTableData } from '../../hooks/useTableData'
 const { wideTableData } = useTableData()
 import Breadcrumb from '../../partials/AppBreadcrumb.vue'
 import { useRouter } from 'vue-router';
+import PaginationItem from '@/components/boards/PaginationItem.vue';
 
 const router = useRouter();
 
