@@ -64,7 +64,7 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: "/board/write",
-    name: "Write",
+    name: "BoardWrite",
     component: BoardWrite,
   },
   {

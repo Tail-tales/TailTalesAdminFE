@@ -66,7 +66,7 @@
 
         <router-link
           class="flex items-center px-6 py-2 mt-4 duration-200 border-l-4"
-          :class="[$route.name === 'user' ? activeClass : inactiveClass]"
+          :class="[$route.name === 'User' ? activeClass : inactiveClass]"
         to="/user"
         >
           <svg 
@@ -81,12 +81,12 @@
         </router-link>
         
         <p class="pl-4 my-2 text-xs font-semibold mb-4 text-gray-400">
-          BOARD
+          BOARDS
         </p>
 
         <router-link
           class="flex items-center px-6 py-2 mt-4 duration-200 border-l-4"
-          :class="[$route.name === 'Forms' ? activeClass : inactiveClass]"
+          :class="[$route.name === 'Category' ? activeClass : inactiveClass]"
           to="/category"
         >
         <svg
@@ -118,7 +118,7 @@
 
         <router-link
           class="flex items-center px-6 py-2 mt-4 duration-200 border-l-4"
-          :class="[$route.name === 'Tables' ? activeClass : inactiveClass]"
+          :class="[$route.name === 'Board' ? activeClass : inactiveClass]"
           to="/board"
         >
           <svg
@@ -146,7 +146,7 @@
 
         <router-link
           class="flex items-center px-6 py-2 mt-4 duration-200 border-l-4"
-          :class="[$route.name === 'Forms' ? activeClass : inactiveClass]"
+          :class="[$route.name === 'BoardWrite' ? activeClass : inactiveClass]"
           to="/board/write"
         >
           <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -169,7 +169,7 @@
 
         <router-link
           class="flex items-center px-6 py-2 mt-4 duration-200 border-l-4"
-          :class="[$route.name === 'Tables' ? activeClass : inactiveClass]"
+          :class="[$route.name === 'Places' ? activeClass : inactiveClass]"
           to="/places"
         >
           <svg
@@ -197,7 +197,7 @@
 
         <router-link
           class="flex items-center px-6 py-2 mt-4 duration-200 border-l-4"
-          :class="[$route.name === 'Forms' ? activeClass : inactiveClass]"
+          :class="[$route.name === 'PlaceWrite' ? activeClass : inactiveClass]"
           to="/places/write"
         >
           <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
