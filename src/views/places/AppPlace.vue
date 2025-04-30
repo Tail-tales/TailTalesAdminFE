@@ -3,6 +3,15 @@
     <!-- Breadcrumb -->
     <Breadcrumb breadcrumb="place" />
     <div class="mt-4 mb-3">
+      <FilterForm
+        :filters="[
+          { key: 'category', label: '카테고리', placeholder: '카테고리 선택', options: ['전체', '양서류', '조류', '파충류' ] },
+          { key: 'type', label: '타입', placeholder: '타입 선택', options: ['전체', '의료', '분양', '먹이', '용품'] },
+          { key: 'sort', label: '정렬', placeholder: '정렬 기준', options: ['최신순', '오래된순', '조회수순', '댓글순', '즐겨찾기순'] },
+        ]"
+        @update:filters="handleFiltersUpdate"
+        @update:searchTerm="handleSearchTermUpdate"
+      />
       <div class="flex flex-wrap gap-4">
         <div
           v-for="u in placeTableData"
@@ -64,7 +73,24 @@
 <script lang="ts" setup>
 import Breadcrumb from '../../partials/AppBreadcrumb.vue'
 import { useTableData } from '../../hooks/useTableData'
+import { ref } from 'vue';
+import FilterForm from '@/components/FilterForm.vue';
+
 const { placeTableData } = useTableData()
+
+const filterConditions = ref({});
+const searchTerm = ref('');
+
+
+const handleFiltersUpdate = (filters: { [key: string]: string }) => {
+  filterConditions.value = filters;
+  console.log('선택된 필터:', filters);
+};
+
+const handleSearchTermUpdate = (term: string) => {
+  searchTerm.value = term;
+  console.log('검색어:', term);
+};
 
 interface Hour {
   day: string;
