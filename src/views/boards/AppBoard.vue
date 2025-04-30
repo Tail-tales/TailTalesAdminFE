@@ -212,9 +212,9 @@
 </template>
 
 <script setup lang="ts">
-import { useTableData } from '../hooks/useTableData'
+import { useTableData } from '../../hooks/useTableData'
 const { wideTableData } = useTableData()
-import Breadcrumb from '../partials/AppBreadcrumb.vue'
+import Breadcrumb from '../../partials/AppBreadcrumb.vue'
 import { useRouter } from 'vue-router';
 
 const router = useRouter();

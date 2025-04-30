@@ -26,6 +26,24 @@ export interface IWideTableData {
   createdAt: string;
 }
 
+export interface placeTableData {
+  id: number;
+  type: string;
+  category: string;
+  placeName: string;
+  address: string;
+  hours: {
+    day: string;
+    start: string;
+    end: string;
+  }[];
+  contact: string;
+  score: number;
+  createdAt: string;
+  updatedAt: string;
+  isDeleted: boolean;
+}
+
 export function useTableData() {
   const simpleTableData = ref<ISimpleTableData[]>([
     { title: '산책 같이 시키실 분', comment: '저요요' },
@@ -106,9 +124,34 @@ export function useTableData() {
     }))
   );
 
+  const placeTableData = ref<placeTableData[]>(
+    Array(9).fill(null).map((_, index) => ({
+      id: index + 1,
+      type: '병원',
+      category: '양서류',
+      placeName: '동물병원',
+      address: '부산 남구 어쩌고',
+      hours: [
+        { day: "monday", start: "09:00", end: "18:00" },
+        { day: "tuesday", start: "09:00", end: "18:00" },
+        { day: "wednesday", start: "09:00", end: "18:00" },
+        { day: "thursday", start: "09:00", end: "18:00" },
+        { day: "friday", start: "09:00", end: "20:00" },
+        { day: "saturday", start: "10:00", end: "16:00" },
+        { day: "sunday", start: "휴무", end: "휴무" },
+      ],
+      contact: '051-000-0000',
+      score: 2.5,
+      createdAt: '',
+      updatedAt: '',
+      isDeleted: false
+    }))
+  );
+
   return {
     simpleTableData,
     paginatedTableData,
     wideTableData,
+    placeTableData,
   };
 }

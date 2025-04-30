@@ -318,6 +318,7 @@
             >
             <router-link
               to="/"
+              @click="logout"
               class="
                 flex
                 px-4
@@ -353,8 +354,13 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { useSidebar } from "../hooks/useSidebar";
+import { useAuthStore } from "@/stores/auth";
 
 const dropdownOpen = ref(false);
 const { isOpen } = useSidebar();
 const notificationOpen = ref(false);
+
+function logout() {
+  useAuthStore().logout();
+}
 </script>
