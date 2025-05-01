@@ -5,9 +5,11 @@ import axios from 'axios';
 export const useAuthStore = defineStore('auth', () => {
   // State
     const accessToken = ref<string | null>(null);
+    const adminId = ref<string | null>(null);
 
   // Getters
     const isloggedIn = computed(() => !!accessToken.value);
+    const currentAdminId = computed(() => adminId.value);
 
   // Actions
     function setAccessToken(token: string | null) {
@@ -15,8 +17,13 @@ export const useAuthStore = defineStore('auth', () => {
         updateAuthHeader(token);
     }
 
+    function setAdminId(id: string | null) {
+        adminId.value = id;
+      }
+
     function clearAccessToken() {
         accessToken.value = null;
+        adminId.value = null;
         updateAuthHeader(null);
     }
 
@@ -28,9 +35,9 @@ export const useAuthStore = defineStore('auth', () => {
         }
     }
 
-    function loginSuccess(token: string) {
+    function loginSuccess(token: string, id: string) {
         setAccessToken(token);
-        console.log('Access Token 저장 완료 (메모리)');
+        setAdminId(id);
         // Refresh Token은 백엔드에서 HTTP-only Cookie로 설정해야 할 것 같음음
     }
     
@@ -60,5 +67,5 @@ export const useAuthStore = defineStore('auth', () => {
     //     }
     // }
 
-    return { accessToken, isloggedIn, setAccessToken, clearAccessToken, loginSuccess, logout };
+    return { accessToken, isloggedIn, currentAdminId, setAccessToken, clearAccessToken, loginSuccess, logout };
 });
