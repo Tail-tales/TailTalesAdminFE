@@ -6,7 +6,6 @@
   <div class="mt-5">
     <form @submit.prevent="submitForm" class="space-y-4">
       <div>
-        <label for="category" class="block text-gray-700 text-sm font-bold mb-2 sr-only">카테고리:</label>
         <select id="category" v-model="formData.category" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
           <option value="" disabled selected>카테고리</option>
           <option v-for="option in categoryOptions" :key="option.value" :value="option.value">
@@ -17,8 +16,8 @@
       <div>
         <input type="text" id="title" v-model="formData.title" placeholder="제목을 입력하세요" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
       </div>
-      <div>
-        <textarea id="content" v-model="formData.content" rows="10" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
+      <div class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-white">
+        <QuillEditor :toolbar="toolbarOptions" theme="snow" v-model="formData.content" ref="quillEditorRef"/>
       </div>
       <div class="bg-gray-100 p-2 rounded-md mb-4 flex items-center space-x-2">
         <label for="fileInput" class="flex items-center cursor-pointer">
@@ -47,8 +46,10 @@
 </template>
 
 <script lang="ts" setup>
+import { QuillEditor } from '@vueup/vue-quill';
 import Breadcrumb from '../../partials/AppBreadcrumb.vue';
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
+import toolbarOptions from '@/hooks/toolbarOptions';
 
 interface UploadedFile {
   file: File;
@@ -69,6 +70,23 @@ const formData = ref({
   files: [] as UploadedFile[], // 변경: 여러 파일 저장을 위한 배열
 });
 
+const quillEditorRef = ref<InstanceType<typeof QuillEditor> | null>(null);
+const quillInstance = ref<any | null>(null);
+
+onMounted(() => {
+  if (quillEditorRef.value) {
+    quillInstance.value = quillEditorRef.value.getQuill();
+    console.log('Quill Instance:', quillInstance.value);
+  }
+});
+
+const getEditorHTML = () => {
+  if (quillInstance.value) {
+    formData.value.content = quillInstance.value.root.innerHTML; // 여전히 root.innerHTML로 접근 가능한지 확인 필요
+    console.log('HTML Content:', formData.value.content);
+  }
+};
+
 const handleFileChange = (event: Event) => {
   const target = event.target as HTMLInputElement;
   const files = Array.from(target.files || []);
@@ -88,6 +106,7 @@ const removeFile = (index: number) => {
 };
 
 const submitForm = () => {
+  getEditorHTML();
   console.log(formData.value);
   alert('글이 작성되었습니다!');
   formData.value.title = '';
