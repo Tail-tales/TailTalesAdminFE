@@ -8,7 +8,6 @@
           :value="filterValues[filter.key]"
           @change="updateFilterValue(filter.key, ($event.target as HTMLSelectElement)?.value)"
           >
-          <option value="" disabled selected>{{ filter.placeholder || 'All' }}</option>
           <option v-for="option in filter.options" :key="option" :value="option">{{ option }}</option>
         </select>
 
@@ -77,7 +76,7 @@ const localSearchTerm = ref(props.searchTerm);
 
 
 props.filters.forEach((filter) => {
-  filterValues.value[filter.key] = '';
+  filterValues.value[filter.key] = filter.options[0] || '';
 });
 
 const updateFilterValue = (key: string, value: string) => {

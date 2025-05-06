@@ -7,8 +7,8 @@
   
           <FilterForm
           :filters="[
-            { key: 'role', label: '역할', placeholder: '역할 선택', options: ['전체', '일반', '펫시터'] },
-            { key: 'level', label: '등급', placeholder: '등급 선택', options: ['전체', 'Bear', 'Otter', 'Dog', 'Parrot', 'Lizard'] },
+            { key: 'role', label: '역할', options: ['전체', '일반', '펫시터'] },
+            { key: 'level', label: '등급', options: ['전체', 'Bear', 'Otter', 'Dog', 'Parrot', 'Lizard'] },
           ]"
           @update:filters="handleFiltersUpdate"
           @update:searchTerm="handleSearchTermUpdate"
