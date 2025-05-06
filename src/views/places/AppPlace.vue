@@ -5,9 +5,9 @@
     <div class="mt-4 mb-3">
       <FilterForm
         :filters="[
-          { key: 'category', label: '카테고리', placeholder: '카테고리 선택', options: ['전체', '양서류', '조류', '파충류' ] },
-          { key: 'type', label: '타입', placeholder: '타입 선택', options: ['전체', '의료', '분양', '먹이', '용품'] },
-          { key: 'sort', label: '정렬', placeholder: '정렬 기준', options: ['최신순', '오래된순', '조회수순', '댓글순', '즐겨찾기순'] },
+          { key: 'category', label: '카테고리', options: ['전체', '양서류', '조류', '파충류' ] },
+          { key: 'type', label: '타입', options: ['전체', '의료', '분양', '먹이', '용품'] },
+          { key: 'sort', label: '정렬', options: ['최신순', '오래된순', '조회수순', '댓글순', '즐겨찾기순'] },
         ]"
         @update:filters="handleFiltersUpdate"
         @update:searchTerm="handleSearchTermUpdate"

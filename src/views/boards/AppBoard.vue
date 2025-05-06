@@ -6,7 +6,7 @@
     <div class="mt-5">
       <FilterForm
         :filters="[
-          { key: 'sort', label: '정렬', placeholder: '정렬 기준', options: ['최신순', '오래된순', '조회수순', '댓글순', '즐겨찾기순'] },
+          { key: 'sort', label: '정렬', options: ['최신순', '오래된순', '조회수순', '댓글순', '즐겨찾기순'] },
         ]"
         @update:filters="handleFiltersUpdate"
         @update:searchTerm="handleSearchTermUpdate"
