@@ -2,7 +2,7 @@
   <div>
     <!-- Breadcrumb -->
     <Breadcrumb breadcrumb="Profile" />
-    <div class="mt-4">
+    <div class="mt-4 flex flex-col">
       <div class="p-6 bg-white rounded-md shadow-md">
         <h2 class="text-lg font-semibold text-gray-700 capitalize">
           Account settings
@@ -85,6 +85,14 @@
             </button>
           </div>
       </div>
+      <div class="ml-auto">
+        <Modal
+          :title="deleteModalTitle"
+          :content="deleteModalContent"
+          color="red"
+          @confirm="DeleteAccount"
+        />
+      </div>
     </div>
   </div>
   <ToastAlert ref="toastAlert"/>
@@ -96,6 +104,10 @@ import Breadcrumb from '../partials/AppBreadcrumb.vue'
 import axios from 'axios'
 import { useAuthStore } from '@/stores/auth'
 import ToastAlert from "@/components/ToastAlert.vue";
+import { useRouter } from 'vue-router';
+import Modal from "@/partials/AppModal.vue";
+
+const router = useRouter();
 
 interface Admin {
   id: string
@@ -191,4 +203,26 @@ const UpdateAdminProfile = async () => {
   }
   console.log('Registered: ', data)
 }
+
+const deleteModalTitle = 'Delete Account';
+const deleteModalContent = 'Are you sure you want to delete your administrator account?';
+
+const DeleteAccount = async () => {
+  try{
+    const id = admin.value.id;
+    const response = await axios.delete(`${API_URL}/${id}`)
+
+    if( response.status === 200 ){
+      toastAlert.value?.show(response.data,'success');
+      authStore.logout();
+      setTimeout(()=>{
+        router.push("/")
+      }, 3000)
+    }
+  }catch (error) {
+    toastAlert.value?.show('계정 탈퇴 중 오류가 발생했습니다.', 'error')
+  }
+}
 </script>
+
+
