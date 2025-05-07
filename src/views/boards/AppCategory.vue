@@ -29,13 +29,26 @@
       </div>
     </div>
   </div>
+  <ToastAlert ref="toastAlert"/>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import draggable from 'vuedraggable'
 import Breadcrumb from '../../partials/AppBreadcrumb.vue'
 import CategoryItem from '../../components/boards/CategoryItem.vue'
+import axios from 'axios'
+import ToastAlert from "@/components/ToastAlert.vue";
+
+const API_URL = 'http://localhost:8080/api/admin/categories';
+const toastAlert = ref<InstanceType<typeof ToastAlert> | null >(null);
+
+interface CategoryRes {
+  bcno: number
+  name: string
+  parentBcno: number
+  depth: number
+}
 
 interface Category {
   id: number
@@ -45,10 +58,32 @@ interface Category {
 
 let idCounter = 1000
 
-const categories = ref<Category[]>([
-  { id: 1, name: '공지사항', children: [] },
-  { id: 2, name: '이벤트', children: [] },
-])
+const categories = ref<Category[]>([])
+
+const fetchCategoryList = async () => {
+  try{
+    const response = await axios.get<CategoryRes[]>(`${API_URL}/all`);
+    response.data.forEach(i => {
+      const newCategory: Category = {
+        id: i.bcno,
+        name: i.name,
+        children: []
+      }
+      if (i.parentBcno === 0){
+        categories.value.push(newCategory)
+      } else{
+        const parent = findCategoryById(categories.value, i.parentBcno)
+        parent?.children.push(newCategory)
+      }
+    })
+  }catch(error){
+    toastAlert.value?.show('카테고리 조회 중 오류가 발생했습니다.', 'error');
+  }
+}
+
+onMounted(()=>{
+  fetchCategoryList();
+})
 
 function addCategory(parentId: number | null) {
   const newCategory: Category = {
