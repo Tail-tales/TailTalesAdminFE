@@ -19,6 +19,7 @@ import BoardWrite from "../views/boards/AppBoardWrite.vue";
 import BoardDetail from "../views/boards/AppBoardDetail.vue";
 import Places from "../views/places/AppPlace.vue";
 import PlaceWrite from "../views/places/AppPlaceWrite.vue";
+import Profile from "../views/AppProfile.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -63,7 +64,7 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: "/board/write",
-    name: "Write",
+    name: "BoardWrite",
     component: BoardWrite,
   },
   {
@@ -86,6 +87,11 @@ const routes: Array<RouteRecordRaw> = [
     path: "/places/write",
     name: "PlaceWrite",
     component: PlaceWrite,
+  },
+  {
+    path: "/profile",
+    name: "Profile",
+    component: Profile,
   },
   {
     path: "/dashboard",

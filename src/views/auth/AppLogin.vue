@@ -106,7 +106,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { useAuthStore } from "@/stores/auth";
 import ToastAlert from "@/components/ToastAlert.vue";
 
@@ -125,17 +125,20 @@ async function login() {
 
     if (response.status === 200){
       const accessToken = response.data.accessToken;
-      if (accessToken) {
-        useAuthStore().loginSuccess(accessToken);
+      const adminId = response.data.adminId;
+      if (accessToken && adminId) {
+        useAuthStore().loginSuccess(accessToken, adminId);
         router.push("/dashboard");
       } else{
         toastAlert.value?.show('Access Token이 존재하지 않습니다.', 'error');
       }
-    } else if (response.status == 403){
-      toastAlert.value?.show('아이디 또는 비밀번호가 일치하지 않습니다.', 'error');
     }
-  } catch (error) {
-    toastAlert.value?.show('로그인 요청 중 오류가 발생했습니다.', 'error');
+  } catch (error: AxiosError) {
+    if (error.response.status === 403) {
+        toastAlert.value?.show('아이디 또는 비밀번호가 잘못되었습니다.', 'error');
+      } else {
+        toastAlert.value?.show('로그인인 요청 중 오류가 발생했습니다.', 'error');
+      }
   }
 }
 

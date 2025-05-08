@@ -1,6 +1,8 @@
 <template>
     <li class="ml-4 mt-2">
-      <div class="group flex items-center justify-between bg-white border p-2 rounded hover:bg-gray-100">
+      <div
+        class="group flex items-center justify-between border p-2 rounded"
+        :class="{ 'bg-indigo-200 hover:bg-indigo-300': isRoot, 'bg-white hover:bg-gray-100': !isRoot }">
         <div v-if="!isEditing" @dblclick="startEdit" class="flex items-center gap-1">
             <svg
                 v-if="isRoot"
