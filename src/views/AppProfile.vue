@@ -204,7 +204,7 @@ const UpdateAdminProfile = async () => {
 }
 
 const deleteModalTitle = 'Delete Account';
-const deleteModalContent = 'Are you sure you want to delete your administrator account?';
+const deleteModalContent = 'The ID and email address you used cannot be re-registered for 30 days. Are you sure you want to delete your administrator account?';
 
 const DeleteAccount = async () => {
   try{
