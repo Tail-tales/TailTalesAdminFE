@@ -45,34 +45,6 @@
           />
         </label>
 
-        <div class="flex items-center justify-between mt-4">
-          <div>
-            <label class="inline-flex items-center">
-              <input
-                type="checkbox"
-                class="
-                  text-indigo-600
-                  border-gray-200
-                  rounded-md
-                  focus:border-indigo-600
-                  focus:ring
-                  focus:ring-opacity-40
-                  focus:ring-indigo-500
-                "
-              />
-              <span class="mx-2 text-sm text-gray-600">Remember me</span>
-            </label>
-          </div>
-
-          <div>
-            <router-link
-              class="block text-sm text-indigo-700 fontme hover:underline"
-              to="/recover-password"
-              >Forgot your password?</router-link
-            >
-          </div>
-        </div>
-
         <div class="mt-6">
           <button
             type="submit"
@@ -90,12 +62,22 @@
             Sign in
           </button>
         </div>
-        <div class="mt-2">
-            <router-link
-              class="block text-sm text-indigo-700 fontme hover:underline text-center"
-              to="/signup"
-              >Don't have an account?</router-link
-            >
+        <div class="flex items-center justify-between mt-4">
+          <div>
+              <router-link
+                class="block text-sm text-indigo-700 fontme hover:underline text-center"
+                to="/signup"
+                >Don't have an account?</router-link
+              >
+          </div>
+          <p class="text-indigo-700">/</p>
+          <div>
+              <router-link
+                class="block text-sm text-indigo-700 fontme hover:underline text-center"
+                to="/recover-password"
+                >Forgot your password?</router-link
+              >
+            </div>
         </div>
       </form>
     </div>
@@ -109,23 +91,23 @@ import { useRouter } from "vue-router";
 import axios, { AxiosError } from "axios";
 import { useAuthStore } from "@/stores/auth";
 import ToastAlert from "@/components/ToastAlert.vue";
+import { LOGIN_URL } from "@/constants/api";
 
 const router = useRouter();
 const id = ref("");
 const password = ref("");
-const API_URL = "http://localhost:8080/auth/login"
 const toastAlert = ref<InstanceType<typeof ToastAlert> | null >(null);
 
 async function login() {
   try {
-    const response = await axios.post(API_URL, {
-      adminId : id.value,
+    const response = await axios.post(LOGIN_URL, {
+      id : id.value,
       password : password.value
     })
 
     if (response.status === 200){
       const accessToken = response.data.accessToken;
-      const adminId = response.data.adminId;
+      const adminId = response.data.id;
       if (accessToken && adminId) {
         useAuthStore().loginSuccess(accessToken, adminId);
         router.push("/dashboard");

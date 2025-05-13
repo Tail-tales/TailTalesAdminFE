@@ -106,6 +106,7 @@ import { useAuthStore } from '@/stores/auth'
 import ToastAlert from "@/components/ToastAlert.vue";
 import { useRouter } from 'vue-router';
 import Modal from "@/partials/AppModal.vue";
+import { ADMIN_URL, ADMIN_UPDATE_URL, EMAIL_CHECK_URL } from '@/constants/api';
 
 const router = useRouter();
 
@@ -132,15 +133,14 @@ const emailCheckResult = ref(true);
 const initialEmail = ref('');
 const authStore = useAuthStore();
 const toastAlert = ref<InstanceType<typeof ToastAlert> | null >(null);
-const API_URL = 'http://localhost:8080/api/admins';
 
 const fetchAdminProfile = async () => {
   if (authStore.isloggedIn) {
     try {
       const adminId = authStore.currentAdminId
-      const response = await axios.get(`${API_URL}/${adminId}`);
+      const response = await axios.get(`${ADMIN_URL}/${adminId}`);
       admin.value = {
-        id: response.data.adminId,
+        id: response.data.id,
         name: response.data.name,
         email: response.data.email,
         contact: response.data.contact,
@@ -167,8 +167,7 @@ watch(() => admin.value.email, () => {
 const checkEmailDuplication = async () => {
     if(admin.value.email !== initialEmail.value) {
       try{
-      const adminEmail = admin.value.email;
-      const response = await axios.get(`${API_URL}/exists/email/${adminEmail}`)
+      const response = await axios.get(`${EMAIL_CHECK_URL}/${admin.value.email}`)
 
       if ( response.data ) {
         errors.value.email = "이미 사용 중인 이메일입니다.";
@@ -190,7 +189,7 @@ const UpdateAdminProfile = async () => {
   const {id, ...data} = JSON.parse(JSON.stringify(admin.value))
   if( emailCheckResult.value ){
     try{
-      const response = await axios.put(`${API_URL}/me`, data)
+      const response = await axios.put(ADMIN_UPDATE_URL, data)
       if(response.status === 200){
         toastAlert.value?.show(response.data,'success');
         initialEmail.value = admin.value.email;
@@ -209,8 +208,7 @@ const deleteModalContent = 'Are you sure you want to delete your administrator a
 
 const DeleteAccount = async () => {
   try{
-    const id = admin.value.id;
-    const response = await axios.delete(`${API_URL}/${id}`)
+    const response = await axios.delete(`${ADMIN_URL}/${admin.value.id}`)
 
     if( response.status === 200 ){
       toastAlert.value?.show(response.data,'success');

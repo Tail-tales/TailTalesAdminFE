@@ -203,9 +203,9 @@
   import { useRouter } from "vue-router";
   import axios, { AxiosError } from "axios";
   import ToastAlert from "@/components/ToastAlert.vue";
+  import { ADMIN_URL, ID_CHECK_URL, EMAIL_CHECK_URL } from "@/constants/api";
 
   const router = useRouter();
-  const API_URL = "http://localhost:8080/api/admins"
   const toastAlert = ref<InstanceType<typeof ToastAlert> | null >(null);
 
   const name = ref("");
@@ -279,8 +279,7 @@
     }
 
     try{
-      const adminId = id.value;
-      const response = await axios.get(`${API_URL}/exists/id/${adminId}`)
+      const response = await axios.get(`${ID_CHECK_URL}/${id.value}`)
 
       if ( response.data ) {
         errors.value.id = "이미 사용 중인 아이디입니다.";
@@ -302,8 +301,7 @@
     }
 
     try{
-      const adminEmail = email.value;
-      const response = await axios.get(`${API_URL}/exists/email/${adminEmail}`)
+      const response = await axios.get(`${EMAIL_CHECK_URL}/${email.value}`)
 
       if ( response.data ) {
         errors.value.email = "이미 사용 중인 이메일입니다.";
@@ -337,9 +335,9 @@
 
     if (!hasErrors && idCheckResult.value) {
       try {
-        const response = await axios.post(API_URL,{
+        const response = await axios.post(ADMIN_URL,{
           name : name.value,
-          adminId : id.value,
+          id : id.value,
           password: password.value,
           contact: phoneNumber.value,
           email : email.value
