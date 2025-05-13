@@ -1,6 +1,15 @@
 <template>
   <Breadcrumb breadcrumb="review" />
   <div class="mt-5">
+    <FilterForm
+        :filters="[
+          { key: 'category', label: '카테고리', options: ['전체', '양서류', '조류', '파충류' ] },
+          { key: 'type', label: '타입', options: ['전체', '의료', '분양', '먹이', '용품'] },
+          { key: 'sort', label: '정렬', options: ['최신순', '오래된순', '좋아요순'] },
+        ]"
+        @update:filters="handleFiltersUpdate"
+        @update:searchTerm="handleSearchTermUpdate"
+      />
     <div v-for="u in post" :key="u.id" class="mt-5 bg-gray-100 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
       <div class="flex items-center justify-between">
         <div class="flex items-center">
@@ -76,6 +85,7 @@ import Breadcrumb from '../partials/AppBreadcrumb.vue';
 import { ref } from 'vue';
 import LevelBadge from '../components/users/LevelBadge.vue';
 import StarRate from "../partials/AppStarRate.vue";
+import FilterForm from '@/components/FilterForm.vue';
 
 interface FileInfo {
   name: string;
@@ -127,6 +137,19 @@ const filterOtherFiles = (files: FileInfo[] | undefined): FileInfo[] => {
 const isImage = (fileName: string): boolean => {
   const ext = fileName.split('.').pop()?.toLowerCase();
   return ['jpg', 'jpeg', 'png', 'gif'].includes(ext || '');
+};
+
+const filterConditions = ref({});
+const searchTerm = ref('');
+
+const handleFiltersUpdate = (filters: { [key: string]: string }) => {
+  filterConditions.value = filters;
+  console.log('선택된 필터:', filters);
+};
+
+const handleSearchTermUpdate = (term: string) => {
+  searchTerm.value = term;
+  console.log('검색어:', term);
 };
 
 </script>
