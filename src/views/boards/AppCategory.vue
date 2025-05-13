@@ -39,8 +39,7 @@ import Breadcrumb from '../../partials/AppBreadcrumb.vue'
 import CategoryItem from '../../components/boards/CategoryItem.vue'
 import axios from 'axios'
 import ToastAlert from "@/components/ToastAlert.vue";
-
-const API_URL = 'http://localhost:8080/api/admin/categories';
+import { CATEGORY_LIST_URL, CATEGORY_UPDATE_URL } from '@/constants/api'
 const toastAlert = ref<InstanceType<typeof ToastAlert> | null >(null);
 
 interface CategoryRes {
@@ -62,7 +61,7 @@ const categories = ref<Category[]>([])
 
 const fetchCategoryList = async () => {
   try{
-    const response = await axios.get<CategoryRes[]>(`${API_URL}/all`);
+    const response = await axios.get<CategoryRes[]>(CATEGORY_LIST_URL);
     response.data.forEach(i => {
       const newCategory: Category = {
         id: i.bcno,
