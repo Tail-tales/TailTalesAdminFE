@@ -87,10 +87,9 @@
   import { useRouter } from "vue-router";
   import ToastAlert from "@/components/ToastAlert.vue";
   import axios, { AxiosError } from "axios";
-
+  import { FIND_PW_URL } from "@/constants/api";
   
   const router = useRouter();
-  const API_URL = "http://localhost:8080/auth/findPassword"
   const isLoading = ref(false);
   const id = ref("");
   const toastAlert = ref<InstanceType<typeof ToastAlert> | null >(null)
@@ -99,7 +98,7 @@
     isLoading.value = true;
 
     try {
-      const response = await axios.post(`${API_URL}?adminId=${id.value}`);
+      const response = await axios.post(`${FIND_PW_URL}/${id.value}`);
       if( response.status === 200 ){
         toastAlert.value?.show(response.data, 'success');
         isLoading.value = false;

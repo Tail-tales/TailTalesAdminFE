@@ -2,7 +2,7 @@
   <div>
     <!-- Breadcrumb -->
     <Breadcrumb breadcrumb="Profile" />
-    <div class="mt-4">
+    <div class="mt-4 flex flex-col">
       <div class="p-6 bg-white rounded-md shadow-md">
         <h2 class="text-lg font-semibold text-gray-700 capitalize">
           Account settings
@@ -85,6 +85,14 @@
             </button>
           </div>
       </div>
+      <div class="ml-auto">
+        <Modal
+          :title="deleteModalTitle"
+          :content="deleteModalContent"
+          color="red"
+          @confirm="DeleteAccount"
+        />
+      </div>
     </div>
   </div>
   <ToastAlert ref="toastAlert"/>
@@ -96,6 +104,11 @@ import Breadcrumb from '../partials/AppBreadcrumb.vue'
 import axios from 'axios'
 import { useAuthStore } from '@/stores/auth'
 import ToastAlert from "@/components/ToastAlert.vue";
+import { useRouter } from 'vue-router';
+import Modal from "@/partials/AppModal.vue";
+import { ADMIN_URL, ADMIN_UPDATE_URL, EMAIL_CHECK_URL } from '@/constants/api';
+
+const router = useRouter();
 
 interface Admin {
   id: string
@@ -120,15 +133,14 @@ const emailCheckResult = ref(true);
 const initialEmail = ref('');
 const authStore = useAuthStore();
 const toastAlert = ref<InstanceType<typeof ToastAlert> | null >(null);
-const API_URL = 'http://localhost:8080/api/admins';
 
 const fetchAdminProfile = async () => {
   if (authStore.isloggedIn) {
     try {
       const adminId = authStore.currentAdminId
-      const response = await axios.get(`${API_URL}/${adminId}`);
+      const response = await axios.get(`${ADMIN_URL}/${adminId}`);
       admin.value = {
-        id: response.data.adminId,
+        id: response.data.id,
         name: response.data.name,
         email: response.data.email,
         contact: response.data.contact,
@@ -155,8 +167,7 @@ watch(() => admin.value.email, () => {
 const checkEmailDuplication = async () => {
     if(admin.value.email !== initialEmail.value) {
       try{
-      const adminEmail = admin.value.email;
-      const response = await axios.get(`${API_URL}/exists/email/${adminEmail}`)
+      const response = await axios.get(`${EMAIL_CHECK_URL}/${admin.value.email}`)
 
       if ( response.data ) {
         errors.value.email = "이미 사용 중인 이메일입니다.";
@@ -178,7 +189,7 @@ const UpdateAdminProfile = async () => {
   const {id, ...data} = JSON.parse(JSON.stringify(admin.value))
   if( emailCheckResult.value ){
     try{
-      const response = await axios.put(`${API_URL}/me`, data)
+      const response = await axios.put(ADMIN_UPDATE_URL, data)
       if(response.status === 200){
         toastAlert.value?.show(response.data,'success');
         initialEmail.value = admin.value.email;
@@ -191,4 +202,25 @@ const UpdateAdminProfile = async () => {
   }
   console.log('Registered: ', data)
 }
+
+const deleteModalTitle = 'Delete Account';
+const deleteModalContent = 'Are you sure you want to delete your administrator account?';
+
+const DeleteAccount = async () => {
+  try{
+    const response = await axios.delete(`${ADMIN_URL}/${admin.value.id}`)
+
+    if( response.status === 200 ){
+      toastAlert.value?.show(response.data,'success');
+      authStore.logout();
+      setTimeout(()=>{
+        router.push("/")
+      }, 3000)
+    }
+  }catch (error) {
+    toastAlert.value?.show('계정 탈퇴 중 오류가 발생했습니다.', 'error')
+  }
+}
 </script>
+
+
