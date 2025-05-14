@@ -98,7 +98,10 @@
     isLoading.value = true;
 
     try {
-      const response = await axios.post(`${FIND_PW_URL}/${id.value}`);
+      const response = await axios.post(FIND_PW_URL, null, {
+      params: {
+        id: id.value
+      }});
       if( response.status === 200 ){
         toastAlert.value?.show(response.data, 'success');
         isLoading.value = false;
