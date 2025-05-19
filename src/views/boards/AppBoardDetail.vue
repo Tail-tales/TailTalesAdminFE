@@ -13,11 +13,11 @@
         </div>
         <div class="ml-4">
           <div class="text-sm font-medium leading-5 text-gray-900">
-            코코
+            {{ post.name }}
             <LevelBadge level="Bear 🐻‍❄️" levelColor="indigo" />
           </div>
           <div class="text-sm leading-5 text-gray-500">
-            2025-04-15
+            {{ post.createdAt }}
           </div>
         </div>
       </div>
@@ -36,7 +36,7 @@
         </button>
         <div class="flex items-center text-gray-500">
           조회
-          <span class="ml-1 text-sm">{{ viewCount }}</span>
+          <span class="ml-1 text-sm">{{ post.viewCnt }}</span>
         </div>
       </div>
     </div>
@@ -46,7 +46,7 @@
       v-if="post"
     >
       <h2 class="text-xl font-semibold mb-2">{{ post.title }}</h2>
-      <p>{{ post.content }}</p>
+      <p v-html="post.content"></p>
 
       <div v-if="post.files && post.files.length > 0" class="mt-4">
         <div class="flex space-x-2">
@@ -178,14 +178,18 @@ interface Comment {
 
 // 예시 데이터 (실제로는 API 호출 등을 통해 가져와야 합니다.)
 const post = ref({
-  id: 1,
+  bno: 1,
   title: '안녕하세요 가입인사 드립니다',
-  content: '이런 커뮤니티가 있는 줄 몰랐는데 정말 좋네요 앞으로 많이 활동하겠습니다!!',
+  name: '코코',
+  content: '<b>이런 커뮤니티가 있는 줄 몰랐는데 정말 좋네요 앞으로 많이 활동하겠습니다!!</b>',
+  viewCnt: 3,
   createdAt: '2025-04-15 14:17:00',
+  updatedAt: '',
   files: [
     { name: 'image1.png', url: 'https://placehold.co/150' },
     { name: 'image2.jpg', url: 'https://placehold.co/100' },
   ] as FileInfo[],
+  categories: ['event'],
 });
 
 const newComment = ref('');
@@ -194,7 +198,6 @@ const commentImagePreview = ref<string | null>(null);
 const comments = ref<Comment[]>([]);
 const isFavorite = ref(false);
 const favoriteCount = ref(2); // 초기 즐겨찾기 수
-const viewCount = ref(10); // 초기 조회수
 
 const imageFiles = computed(() => {
   return post.value?.files?.filter(file => isImage(file.name)) || [];
