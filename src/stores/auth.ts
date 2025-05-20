@@ -59,18 +59,21 @@ export const useAuthStore = defineStore('auth', () => {
     // Access Token 갱신 액션
     async function refreshToken() {
         try {
-        const response = await axios.post(ADMIN_REFRESH_URL, null,{
-          withCredentials: true
-        });
-        const newAccessToken = response.data.accessToken;
-        setAccessToken(newAccessToken);
-        console.log('Access Token 갱신 성공');
-        return true; // 갱신 성공
+          const response = await axios.post(ADMIN_REFRESH_URL, null,{
+            withCredentials: true,
+            headers: {
+              Authorization: null
+            }
+          });
+          const newAccessToken = response.data.accessToken;
+          setAccessToken(newAccessToken);
+          console.log('Access Token 갱신 성공');
+          return true; // 갱신 성공
         } catch (error) {
-        console.error('Access Token 갱신 실패:', error);
-        clearAccessToken();
-        localStorage.removeItem('id');
-        return false; // 갱신 실패
+          console.error('Access Token 갱신 실패:', error);
+          clearAccessToken();
+          localStorage.removeItem('id');
+          return false; // 갱신 실패
         }
     }
 
