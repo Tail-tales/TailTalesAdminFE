@@ -14,10 +14,9 @@ const setupAxiosInterceptors = (router: Router) => {
                 const authStore = useAuthStore();
                 const refreshSuccess = await authStore.refreshToken();
                 if (refreshSuccess && authStore.accessToken) {
-                    axios.defaults.headers.common['Authorization'] = `Bearer ${authStore.accessToken}`; // originalRequest에는 기존 accessToken이 들어있어서 바꿔줌
+                    originalRequest.headers['Authorization'] = `Bearer ${authStore.accessToken}`;
                     return axios(originalRequest); // 원래 요청 재시도
                 } else {
-                    console.error('로그아웃합니다.');
                     setTimeout(()=>router.push('/'), 3000);
                     return Promise.reject(error);
                 }
