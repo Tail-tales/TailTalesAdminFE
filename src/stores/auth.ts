@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import axios from 'axios';
-import { LOGOUT_URL, REFRESH_URL } from '@/constants/api';
+import { LOGOUT_URL, ADMIN_REFRESH_URL } from '@/constants/api';
 
 export const useAuthStore = defineStore('auth', () => {
   // State
@@ -46,7 +46,7 @@ export const useAuthStore = defineStore('auth', () => {
     
     async function logout() {
         try {
-            // await axios.post(LOGOUT_URL);
+            await axios.post(LOGOUT_URL);
             clearAccessToken();
             localStorage.removeItem('id');
             console.log('로그아웃 완료 및 Access Token, id 제거');
@@ -57,19 +57,22 @@ export const useAuthStore = defineStore('auth', () => {
     }
 
     // Access Token 갱신 액션
-    // async function refreshToken() {
-    //     try {
-    //     const response = await axios.post(REFRESH_URL); // Access Token 갱신 API
-    //     const newAccessToken = response.data.accessToken;
-    //     setAccessToken(newAccessToken);
-    //     console.log('Access Token 갱신 성공');
-    //     return true; // 갱신 성공
-    //     } catch (error) {
-    //     console.error('Access Token 갱신 실패:', error);
-    //     clearAccessToken(); // 갱신 실패 시 Access Token 제거
-    //     return false; // 갱신 실패
-    //     }
-    // }
+    async function refreshToken() {
+        try {
+        const response = await axios.post(ADMIN_REFRESH_URL, null,{
+          withCredentials: true
+        });
+        const newAccessToken = response.data.accessToken;
+        setAccessToken(newAccessToken);
+        console.log('Access Token 갱신 성공');
+        return true; // 갱신 성공
+        } catch (error) {
+        console.error('Access Token 갱신 실패:', error);
+        clearAccessToken();
+        localStorage.removeItem('id');
+        return false; // 갱신 실패
+        }
+    }
 
-    return { accessToken, isloggedIn, currentAdminId, setAccessToken, setAdminId, clearAccessToken, loginSuccess, logout };
+    return { accessToken, isloggedIn, currentAdminId, setAccessToken, setAdminId, clearAccessToken, loginSuccess, logout, refreshToken };
 });
