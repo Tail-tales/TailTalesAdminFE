@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import axios from 'axios';
-import { LOGOUT_URL, ADMIN_REFRESH_URL } from '@/constants/api';
+import { LOGOUT_URL, REFRESH_URL } from '@/constants/api';
 
 export const useAuthStore = defineStore('auth', () => {
   // State
@@ -51,6 +51,7 @@ export const useAuthStore = defineStore('auth', () => {
             localStorage.removeItem('id');
             console.log('로그아웃 완료 및 Access Token, id 제거');
         } catch (error) {
+            localStorage.removeItem('id');
             console.error('로그아웃 실패:', error);
             clearAccessToken();
         }
@@ -59,7 +60,7 @@ export const useAuthStore = defineStore('auth', () => {
     // Access Token 갱신 액션
     async function refreshToken() {
         try {
-          const response = await axios.post(ADMIN_REFRESH_URL, null,{
+          const response = await axios.post(REFRESH_URL, null,{
             withCredentials: true,
             headers: {
               Authorization: null
