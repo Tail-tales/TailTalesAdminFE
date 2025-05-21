@@ -151,6 +151,11 @@ const recordChange = (change: CategoryOperation) => {
 };
 
 function addCategory(parentId: number) {
+  if (parentId < 0) {
+    toastAlert.value?.show('상위 카테고리를 먼저 저장해야 하위 카테고리를 추가할 수 있습니다.', 'warning');
+    return; // 함수 실행 중단
+  }
+
   const newCategory: Category = {
     id: idCounter--, // 임시 ID는 음수로 설정
     name: '새 카테고리',
@@ -247,22 +252,20 @@ async function saveChanges() {
     return body;
   })
 
-  console.log('API 요청 바디:', JSON.stringify(requestBody, null, 2));
+  try {
+    const response = await axios.post(CATEGORY_UPDATE_URL, requestBody, {
+        _verifyToken: true,
+      });
 
-  // try {
-  //   const response = await axios.post(CATEGORY_UPDATE_URL, requestBody, {
-  //       _verifyToken: true,
-  //     });
-  //   console.log('API 응답:', response.data);
-  //   toastAlert.value?.show('카테고리 변경사항이 성공적으로 저장되었습니다.', 'success');
+    toastAlert.value?.show('카테고리 변경사항이 성공적으로 저장되었습니다.', 'success');
 
-  //   // 성공적으로 저장되면 변경사항 추적 목록을 비우고 카테고리 목록을 다시 불러옴
-  //   categoryChanges.value = [];
-  //   await fetchCategoryList();
-  // } catch (error) {
-  //   console.error('카테고리 변경사항 저장 중 오류 발생:', error);
-  //   toastAlert.value?.show('카테고리 변경사항 저장 중 오류가 발생했습니다.', 'error');
-  // }
+    // 성공적으로 저장되면 변경사항 추적 목록을 비우고 카테고리 목록을 다시 불러옴
+    categoryChanges.value = [];
+    await fetchCategoryList();
+  } catch (error) {
+    console.error('카테고리 변경사항 저장 중 오류 발생:', error);
+    toastAlert.value?.show('카테고리 변경사항 저장 중 오류가 발생했습니다.', 'error');
+  }
 }
 
 // 유틸 함수
