@@ -191,7 +191,7 @@ const UpdateAdminProfile = async () => {
   const {id, ...data} = JSON.parse(JSON.stringify(admin.value))
   if( emailCheckResult.value ){
     try{
-      const response = await axios.put(ADMIN_UPDATE_URL, data, {
+      const response = await axios.patch(ADMIN_UPDATE_URL, data, {
         _verifyToken: true,
       })
       if(response.status === 200){
