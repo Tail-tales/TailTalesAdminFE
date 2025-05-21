@@ -138,7 +138,9 @@ const fetchAdminProfile = async () => {
   if (authStore.isloggedIn) {
     try {
       const adminId = authStore.currentAdminId
-      const response = await axios.get(`${ADMIN_URL}/${adminId}`);
+      const response = await axios.get(`${ADMIN_URL}/${adminId}`, {
+        _verifyToken: true,
+      });
       admin.value = {
         id: response.data.id,
         name: response.data.name,
@@ -189,7 +191,9 @@ const UpdateAdminProfile = async () => {
   const {id, ...data} = JSON.parse(JSON.stringify(admin.value))
   if( emailCheckResult.value ){
     try{
-      const response = await axios.put(ADMIN_UPDATE_URL, data)
+      const response = await axios.put(ADMIN_UPDATE_URL, data, {
+        _verifyToken: true,
+      })
       if(response.status === 200){
         toastAlert.value?.show(response.data,'success');
         initialEmail.value = admin.value.email;
@@ -208,7 +212,9 @@ const deleteModalContent = 'The ID and email address you used cannot be re-regis
 
 const DeleteAccount = async () => {
   try{
-    const response = await axios.delete(`${ADMIN_URL}/${admin.value.id}`)
+    const response = await axios.delete(`${ADMIN_URL}/${admin.value.id}`,{
+      _verifyToken: true,
+    })
 
     if( response.status === 200 ){
       toastAlert.value?.show(response.data,'success');

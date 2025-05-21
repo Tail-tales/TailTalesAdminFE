@@ -103,6 +103,8 @@ async function login() {
     const response = await axios.post(LOGIN_URL, {
       id : id.value,
       password : password.value
+    },{
+      withCredentials: true
     })
 
     if (response.status === 200){
