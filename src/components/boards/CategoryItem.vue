@@ -36,34 +36,27 @@
       </div>
   
       <ul>
-        <draggable
-          :list="category.children"
-          item-key="id"
-          group="categories"
-          @update="$emit('reorder', category.id)"
-        >
-          <template #item="{ element }">
-            <CategoryItem
-              :category="element"
-              @add="$emit('add', element.id)"
-              @update="(id, name) => $emit('update', id, name)"
-              @delete="$emit('delete', element.id)"
-              @reorder="$emit('reorder', element.id)"
-            />
-          </template>
-        </draggable>
+        <template v-for="element in category.children" :key="element.id">
+          <CategoryItem
+            :category="element"
+            @add="$emit('add', element.id)"
+            @update="(id, name) => $emit('update', id, name)"
+            @delete="$emit('delete', element.id)"
+          />
+        </template>
       </ul>
     </li>
   </template>
   
   <script setup lang="ts">
   import { ref, watch } from 'vue'
-  import draggable from 'vuedraggable'
 
   interface Category {
   id: number
   name: string
+  parentBcno: number
   children: Category[]
+  isNew?: boolean
 }
   
   const props = defineProps<{
@@ -75,7 +68,6 @@
     (e: 'add', id: number): void
     (e: 'update', id: number, name: string): void
     (e: 'delete', id: number): void
-    (e: 'reorder', parentId: number): void
   }>()
   
   const isEditing = ref(false)

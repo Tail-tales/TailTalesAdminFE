@@ -5,23 +5,15 @@
     <h2 class="text-xl font-semibold leading-tight text-gray-700">카테고리 관리</h2>
     <div class="mt-5">
       <ul class="mt-4">
-        <draggable
-          :list="categories"
-          item-key="id"
-          group="categories"
-          @update="onDrag(null)"
-        >
-          <template #item="{ element }">
-            <CategoryItem
-              :category="element"
-              :isRoot="true"
-              @add="addCategory"
-              @update="updateCategory"
-              @delete="deleteCategory"
-              @reorder="onDrag"
-            />
-          </template>
-        </draggable>
+        <template v-for="element in categories" :key="element.id">
+          <CategoryItem
+            :category="element"
+            :isRoot="true"
+            @add="addCategory"
+            @update="updateCategory"
+            @delete="deleteCategory"
+          />
+        </template>
       </ul>
       <div class="flex justify-end py-2">
         <button class="px-4 py-2 mr-2 font-medium tracking-wide text-white capitalize transition-colors duration-200 transform bg-indigo-600 rounded-md hover:bg-indigo-500 focus:outline-none focus:bg-indigo-500" @click="addCategory(null)">카테고리 추가</button>
@@ -34,7 +26,6 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import draggable from 'vuedraggable'
 import Breadcrumb from '../../partials/AppBreadcrumb.vue'
 import CategoryItem from '../../components/boards/CategoryItem.vue'
 import axios from 'axios'
@@ -64,7 +55,7 @@ interface CategoryOperation {
   parentBcno?: number | null;
 }
 
-let idCounter = -1 // 음수 ID는 새로운 카테고리리
+let idCounter = -1 // 음수 ID는 새로운 카테고리
 
 const categories = ref<Category[]>([])
 const categoryChanges = ref<CategoryOperation[]>([])
@@ -272,13 +263,6 @@ async function saveChanges() {
   //   console.error('카테고리 변경사항 저장 중 오류 발생:', error);
   //   toastAlert.value?.show('카테고리 변경사항 저장 중 오류가 발생했습니다.', 'error');
   // }
-}
-
-// drag-and-drop에서 children도 reorder 가능하도록
-function onDrag(parentId: number | null) {
-  return () => {
-    console.log('Reordered under parent:', parentId)
-  }
 }
 
 // 유틸 함수
