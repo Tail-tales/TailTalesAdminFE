@@ -101,8 +101,9 @@
 
         <label class="block mt-3">
             <span class="text-sm text-gray-700 font-bold">Email</span>
+            <div class="flex">
             <input
-              type="email"
+              type="text"
               class="
                 block
                 w-full
@@ -114,11 +115,35 @@
                 focus:ring
                 focus:ring-opacity-40
                 focus:ring-indigo-500
-              "
+                "
+              :class="{ 'border-red-500': errors.email && errors.email !== '사용 가능한 이메일입니다.' ,  'border-green-500': errors.email === '사용 가능한 이메일입니다.'}"
               placeholder="Email"
               v-model="email"
             />
-          </label>
+            <button
+              type="button"
+              class="
+                w-32
+                px-2
+                py-2
+                text-sm text-center text-white
+                bg-indigo-600
+                rounded-md
+                focus:outline-none
+                hover:bg-indigo-500
+              "
+              @click="checkEmailDuplication"
+              >
+              check email
+            </button>
+          </div>
+          <p
+          class="mt-1 text-sm" 
+          :class="{'text-red-500': errors.email !== '사용 가능한 이메일입니다.', 'text-green-500': errors.email === '사용 가능한 이메일입니다.'}"
+          v-if="errors.email"
+          >{{ errors.email }}
+        </p>
+        </label>
 
         <label class="block mt-3">
           <span class="text-sm text-gray-700 font-bold">Phone Number</span>
@@ -178,9 +203,9 @@
   import { useRouter } from "vue-router";
   import axios, { AxiosError } from "axios";
   import ToastAlert from "@/components/ToastAlert.vue";
+  import { ADMIN_URL, ID_CHECK_URL, EMAIL_CHECK_URL } from "@/constants/api";
 
   const router = useRouter();
-  const API_URL = "http://localhost:8080/api/admins"
   const toastAlert = ref<InstanceType<typeof ToastAlert> | null >(null);
 
   const name = ref("");
@@ -198,6 +223,7 @@
   });
 
   const idCheckResult = ref(false);
+  const emailCheckResult = ref(false);
 
   type ErrorKeys = keyof typeof errors.value;
 
@@ -210,7 +236,7 @@
   ],
     password: [
       (v: string) => !!v || "비밀번호를 입력해주세요.",
-      (v: string) => v.length >= 6 || "비밀번호는 최소 6자 이상이어야 합니다.",
+      (v: string) => v.length >= 8 || "비밀번호는 최소 8자 이상이어야 합니다.",
       (v: string) => /(?=.*\d)/.test(v) || '숫자를 포함해야합니다',
       (v: string) => /([!@$%])/.test(v) || '특수문자를 포함해야합니다 [!,@,#,$,d%]'
     ],
@@ -253,8 +279,7 @@
     }
 
     try{
-      const adminId = id.value;
-      const response = await axios.get(`${API_URL}/exists/${adminId}`)
+      const response = await axios.get(`${ID_CHECK_URL}/${id.value}`)
 
       if ( response.data ) {
         errors.value.id = "이미 사용 중인 아이디입니다.";
@@ -268,6 +293,27 @@
     }
   };
 
+  const checkEmailDuplication = async () => {
+    if (!email.value) {
+      errors.value.email = "아이디를 입력해주세요.";
+      emailCheckResult.value = false;
+      return;
+    }
+
+    try{
+      const response = await axios.get(`${EMAIL_CHECK_URL}/${email.value}`)
+
+      if ( response.data ) {
+        errors.value.email = "이미 사용 중인 이메일입니다.";
+        emailCheckResult.value = false; 
+      } else{
+        errors.value.email = "사용 가능한 이메일입니다.";
+        emailCheckResult.value = true; 
+      }
+    }catch(error){
+      toastAlert.value?.show('이메일 중복검사 중 오류가 발생했습니다.', 'error');
+    }
+  };
 
   // 각 필드의 값이 변경될 때 유효성 검사 실행
   watch(name, (newValue) => validateField('name', newValue));
@@ -289,9 +335,9 @@
 
     if (!hasErrors && idCheckResult.value) {
       try {
-        const response = await axios.post(API_URL,{
+        const response = await axios.post(ADMIN_URL,{
           name : name.value,
-          adminId : id.value,
+          id : id.value,
           password: password.value,
           contact: phoneNumber.value,
           email : email.value

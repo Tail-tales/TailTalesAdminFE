@@ -959,5 +959,10 @@ module.exports = {
     'text-yellow-900',
     'bg-red-200',
     'text-red-900',
+    'bg-red-500',
+    'bg-red-600',
+    'text-red-400',
+    'text-red-500',
+    'text-red-900',
   ],
 }
