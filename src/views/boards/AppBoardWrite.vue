@@ -35,7 +35,9 @@ import ToastAlert from "@/components/ToastAlert.vue";
 import axios from 'axios';
 import { CATEGORY_LIST_URL, BOARD_URL } from '@/constants/api';
 import CategorySelect from '@/components/boards/CategorySelect.vue';
+import { useRouter } from 'vue-router';
 
+const router = useRouter();
 const toastAlert = ref<InstanceType<typeof ToastAlert> | null >(null);
 
 interface Category {
@@ -84,22 +86,25 @@ const getEditorHTML = () => {
 
 const submitForm = async () => {
   getEditorHTML();
-  const newPost = {
-    title: formData.value.title,
-    content: formData.value.content,
-    categories: formData.value.categories
+  try {
+    const response = await axios.post(BOARD_URL,{
+      title: formData.value.title,
+      content: formData.value.content,
+      categories: formData.value.categories
+      },
+    { 
+      _verifyToken: true
+    });
+    toastAlert.value?.show('게시글이 성공적으로 작성되었습니다.', 'success');
+    setTimeout(()=>{
+      formData.value.title = '';
+      formData.value.content = '';
+      formData.value.categories = null; // 초기화
+      router.push(`/boards/${response.data}`)
+    }, 2000)
+  } catch (error) {
+    console.error('게시글 작성 중 오류 발생:', error);
+    toastAlert.value?.show('게시글 작성 중 오류가 발생했습니다.', 'error');
   }
-  console.log(newPost);
-  // try {
-  //   const response = await axios.post(BOARD_URL,{ newPost },{ _verifyToken: true });
-  //   console.log('게시글 작성 성공:', response.data);
-  //   toastAlert.value?.show('게시글이 성공적으로 작성되었습니다.', 'success');
-  //   formData.value.title = '';
-  //   formData.value.content = '';
-  //   formData.value.categories = null; // 초기화
-  // } catch (error) {
-  //   console.error('게시글 작성 중 오류 발생:', error);
-  //   toastAlert.value?.show('게시글 작성 중 오류가 발생했습니다.', 'error');
-  // }
 };
 </script>
