@@ -119,7 +119,7 @@
         <router-link
           class="flex items-center px-6 py-2 mt-4 duration-200 border-l-4"
           :class="[$route.name === 'Board' ? activeClass : inactiveClass]"
-          to="/board"
+          to="/boards"
         >
           <svg
             class="w-5 h-5"
@@ -147,7 +147,7 @@
         <router-link
           class="flex items-center px-6 py-2 mt-4 duration-200 border-l-4"
           :class="[$route.name === 'BoardWrite' ? activeClass : inactiveClass]"
-          to="/board/write"
+          to="/boards/write"
         >
           <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
             <path
@@ -221,7 +221,7 @@
         <router-link
           class="flex items-center px-6 py-2 mt-4 duration-200 border-l-4"
           :class="[$route.name === 'Review' ? activeClass : inactiveClass]"
-          to="/review"
+          to="/reviews"
         >
           <svg
             class="w-5 h-5"

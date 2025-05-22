@@ -169,7 +169,7 @@ const filterConditions = ref({});
 const searchTerm = ref('');
 
 const goToDetail = (id: number) => {
-  router.push(`/board/${id}`);
+  router.push(`/boards/${id}`);
 }
 
 const handleFiltersUpdate = (filters: { [key: string]: string }) => {

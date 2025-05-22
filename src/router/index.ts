@@ -53,18 +53,18 @@ const routes: Array<RouteRecordRaw> = [
     props: true,
   },
   {
-    path: "/board",
+    path: "/boards",
     name: "Board",
     component: Board,
   },
   {
-    path: "/board/:id",
+    path: "/boards/:id",
     name: "BoardDetail",
     component: BoardDetail,
     props: true,
   },
   {
-    path: "/board/write",
+    path: "/boards/write",
     name: "BoardWrite",
     component: BoardWrite,
   },
