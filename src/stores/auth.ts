@@ -26,7 +26,7 @@ export const useAuthStore = defineStore('auth', () => {
         accessToken.value = null;
         adminId.value = null;
         updateAuthHeader(null);
-        localStorage.removeItem('accessToken');
+        sessionStorage.removeItem('accessToken');
     }
 
     function updateAuthHeader(token: string | null) {
@@ -40,18 +40,18 @@ export const useAuthStore = defineStore('auth', () => {
     function loginSuccess(token: string, id: string) {
         setAccessToken(token);
         setAdminId(id);
-        localStorage.setItem('accessToken', token);
-        localStorage.setItem('id', id);
+        sessionStorage.setItem('accessToken', token);
+        sessionStorage.setItem('id', id);
     }
     
     async function logout() {
         try {
             await axios.post(LOGOUT_URL);
             clearAccessToken();
-            localStorage.removeItem('id');
+            sessionStorage.removeItem('id');
             console.log('로그아웃 완료 및 Access Token, id 제거');
         } catch (error) {
-            localStorage.removeItem('id');
+            sessionStorage.removeItem('id');
             console.error('로그아웃 실패:', error);
             clearAccessToken();
         }
@@ -73,7 +73,7 @@ export const useAuthStore = defineStore('auth', () => {
         } catch (error) {
           console.error('Access Token 갱신 실패:', error);
           clearAccessToken();
-          localStorage.removeItem('id');
+          sessionStorage.removeItem('id');
           return false; // 갱신 실패
         }
     }
