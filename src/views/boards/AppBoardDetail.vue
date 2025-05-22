@@ -1,7 +1,7 @@
 <template>
   <Breadcrumb breadcrumb="board" />
 
-  <div class="mt-5">
+  <div v-if="boardDetail" class="mt-5">
     <div class="flex items-center justify-between">
       <div class="flex items-center">
         <div class="flex-shrink-0 w-10 h-10">
@@ -13,11 +13,11 @@
         </div>
         <div class="ml-4">
           <div class="text-sm font-medium leading-5 text-gray-900">
-            {{ post.name }}
+            {{ boardDetail.name }}
             <LevelBadge level="Bear 🐻‍❄️" levelColor="indigo" />
           </div>
           <div class="text-sm leading-5 text-gray-500">
-            {{ post.createdAt }}
+            {{ boardDetail.createdAt }}
           </div>
         </div>
       </div>
@@ -36,7 +36,7 @@
         </button>
         <div class="flex items-center text-gray-500">
           조회
-          <span class="ml-1 text-sm">{{ post.viewCnt }}</span>
+          <span class="ml-1 text-sm">{{ boardDetail.viewCnt }}</span>
         </div>
       </div>
     </div>
@@ -45,8 +45,8 @@
       class="mt-5 bg-gray-100 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
       v-if="post"
     >
-      <h2 class="text-xl font-semibold mb-2">{{ post.title }}</h2>
-      <p v-html="post.content"></p>
+      <h2 class="text-xl font-semibold mb-2">{{ boardDetail.title }}</h2>
+      <p class="ql-editor" v-html="boardDetail.content"></p>
 
       <div v-if="post.files && post.files.length > 0" class="mt-4">
         <div class="flex space-x-2">
@@ -163,8 +163,17 @@
 
 <script lang="ts" setup>
 import Breadcrumb from '../../partials/AppBreadcrumb.vue';
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import LevelBadge from '../../components/users/LevelBadge.vue';
+import axios from 'axios';
+import { BOARD_URL } from '@/constants/api';
+
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
+  }
+})
 
 interface FileInfo {
   name: string;
@@ -175,6 +184,35 @@ interface Comment {
   text: string;
   imagePreview: string | null;
 }
+
+interface boardInfo {
+  bno: number;
+  title: string;
+  name: string;
+  content: string;
+  viewCnt: number;
+  createdAt: string;
+  updatedAt: string | null;
+  categories: string[]; // 왜 얘는 string이지..?
+}
+
+const boardDetail = ref<boardInfo | null>(null)
+
+const fetchBoardDetail = async (id: number) => {
+  try {
+    const response = await axios.get(`${BOARD_URL}/${id}`, {
+      _verifyToken: true,
+    });
+    boardDetail.value = response.data;
+    console.log('게시글 상세 데이터:', boardDetail.value);
+  } catch (error) {
+    console.error(`게시글 ${id} 조회 중 오류 발생:`, error);
+  }
+};
+
+onMounted(() => {
+  fetchBoardDetail(props.id);
+});
 
 // 예시 데이터 (실제로는 API 호출 등을 통해 가져와야 합니다.)
 const post = ref({
@@ -249,11 +287,4 @@ const toggleFavorite = () => {
     // 실제 백엔드 연동 시 즐겨찾기 제거 API 호출
   }
 };
-
-// 컴포넌트가 마운트될 때 조회수를 증가시키는 예시 (실제로는 백엔드에서 처리하는 것이 일반적입니다.)
-import { onMounted } from 'vue';
-onMounted(() => {
-  viewCount.value++;
-  // 실제 백엔드 연동 시 조회수 증가 API 호출
-});
 </script>
