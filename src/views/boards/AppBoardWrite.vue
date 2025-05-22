@@ -6,12 +6,11 @@
   <div class="mt-5">
     <form @submit.prevent="submitForm" class="space-y-4">
       <div>
-        <select id="category" v-model="formData.category" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-          <option value="" disabled selected>카테고리</option>
-          <option v-for="option in allCategories" :key="option.id" :value="option.id">
-            {{ option.name }}
-          </option>
-        </select>
+        <CategorySelect 
+          v-model="formData.categories"
+          :categories="categories"
+          placeholder="카테고리 선택"
+        />
       </div>
       <div>
         <input type="text" id="title" v-model="formData.title" placeholder="제목을 입력하세요" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
@@ -35,29 +34,21 @@ import toolbarOptions from '@/hooks/toolbarOptions';
 import ToastAlert from "@/components/ToastAlert.vue";
 import axios from 'axios';
 import { CATEGORY_LIST_URL, BOARD_URL } from '@/constants/api';
+import CategorySelect from '@/components/boards/CategorySelect.vue';
 
 const toastAlert = ref<InstanceType<typeof ToastAlert> | null >(null);
 
-interface CategoryRes {
+interface Category {
   bcno: number
   name: string
   parentBcno: number
-  depth: number
-}
-
-interface Category {
-  id: number
-  name: string
-  parentBcno: number
-  children: Category[]
   depth: number;
 }
 
 const categories = ref<Category[]>([])
-const allCategories = ref<Category[]>([])
 
 const formData = ref({
-  category: '',
+  categories: null as number[] | null,
   title: '',
   content: '',
 });
@@ -65,60 +56,12 @@ const formData = ref({
 const quillEditorRef = ref<InstanceType<typeof QuillEditor> | null>(null);
 const quillInstance = ref<any | null>(null);
 
-const flattenCategories = (categoryList: Category[]) => {
-  categoryList.forEach(cat => {
-    const prefix = '└'+'─'.repeat(cat.depth)+' '; // depth * 2 칸씩 들여쓰기
-    allCategories.value.push({
-      ...cat,
-      name: `${prefix}${cat.name}`, // 들여쓰기된 이름으로 저장
-    });
-    // 자식 카테고리에 대해 재귀 호출 (flattenCategories는 depth를 내부적으로 관리할 필요 없음)
-    if (cat.children && cat.children.length > 0) {
-      // 자식들은 이미 자신들의 정확한 depth를 가지고 있으므로,
-      // 다시 flattenCategories를 호출할 때 depth 매개변수를 전달할 필요 없음.
-      flattenCategories(cat.children);
-    }
-  });
-};
-
 const fetchCategoryList = async () => {
   try{
-    const response = await axios.get<CategoryRes[]>(CATEGORY_LIST_URL,{
+    const response = await axios.get<Category[]>(CATEGORY_LIST_URL,{
         _verifyToken: true,
       });
-    categories.value = [];
-    allCategories.value = [];
-
-    const categoryMap: Map<number, Category> = new Map();
-
-    response.data.forEach(i => {
-      const newCategory: Category = {
-        id: i.bcno,
-        name: i.name,
-        children: [],
-        parentBcno: i.parentBcno,
-        depth: i.depth
-      }
-      categoryMap.set(i.bcno, newCategory);
-    });
-
-    response.data.sort((a, b) => a.depth - b.depth || a.bcno - b.bcno);
-
-    // 부모-자식 관계 설정
-    response.data.forEach(i => {
-      const currentCategory = categoryMap.get(i.bcno);
-      if (currentCategory) {
-        if (i.parentBcno === 0) {
-          categories.value.push(currentCategory);
-        } else {
-          const parent = categoryMap.get(i.parentBcno);
-          parent?.children.push(currentCategory);
-        }
-      }
-    });
-
-    flattenCategories(categories.value);
-
+    categories.value = response.data;
   }catch(error){
     toastAlert.value?.show('카테고리 조회 중 오류가 발생했습니다.', 'error');
   }
@@ -144,11 +87,19 @@ const submitForm = async () => {
   const newPost = {
     title: formData.value.title,
     content: formData.value.content,
-    categories: [formData.value.category]
+    categories: formData.value.categories
   }
   console.log(newPost);
-  // const response = await axios.post(BOARD_URL,{ newPost },{ _verifyToken: true })
-  // formData.value.title = '';
-  // formData.value.content = '';
+  // try {
+  //   const response = await axios.post(BOARD_URL,{ newPost },{ _verifyToken: true });
+  //   console.log('게시글 작성 성공:', response.data);
+  //   toastAlert.value?.show('게시글이 성공적으로 작성되었습니다.', 'success');
+  //   formData.value.title = '';
+  //   formData.value.content = '';
+  //   formData.value.categories = null; // 초기화
+  // } catch (error) {
+  //   console.error('게시글 작성 중 오류 발생:', error);
+  //   toastAlert.value?.show('게시글 작성 중 오류가 발생했습니다.', 'error');
+  // }
 };
 </script>
