@@ -20,6 +20,7 @@ import BoardDetail from "../views/boards/AppBoardDetail.vue";
 import Places from "../views/places/AppPlace.vue";
 import PlaceWrite from "../views/places/AppPlaceWrite.vue";
 import Profile from "../views/AppProfile.vue";
+import Review from "../views/AppReview.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -52,18 +53,18 @@ const routes: Array<RouteRecordRaw> = [
     props: true,
   },
   {
-    path: "/board",
+    path: "/boards",
     name: "Board",
     component: Board,
   },
   {
-    path: "/board/:id",
+    path: "/boards/:id",
     name: "BoardDetail",
     component: BoardDetail,
     props: true,
   },
   {
-    path: "/board/write",
+    path: "/boards/write",
     name: "BoardWrite",
     component: BoardWrite,
   },
@@ -77,16 +78,15 @@ const routes: Array<RouteRecordRaw> = [
     name: "Places",
     component: Places,
   },
-  // {
-  //   path: "/places/:id",
-  //   name: "PlaceDetail",
-  //   component: PlaceDetail,
-  //   props: true,
-  // },
   {
     path: "/places/write",
     name: "PlaceWrite",
     component: PlaceWrite,
+  },
+  {
+    path: "/review",
+    name: "Review",
+    component: Review,
   },
   {
     path: "/profile",

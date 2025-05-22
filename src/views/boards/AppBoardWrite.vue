@@ -6,12 +6,11 @@
   <div class="mt-5">
     <form @submit.prevent="submitForm" class="space-y-4">
       <div>
-        <select id="category" v-model="formData.category" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-          <option value="" disabled selected>카테고리</option>
-          <option v-for="option in categoryOptions" :key="option.value" :value="option.value">
-            {{ option.label }}
-          </option>
-        </select>
+        <CategorySelect 
+          v-model="formData.categories"
+          :categories="categories"
+          placeholder="카테고리 선택"
+        />
       </div>
       <div>
         <input type="text" id="title" v-model="formData.title" placeholder="제목을 입력하세요" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
@@ -24,6 +23,7 @@
       </div>
     </form>
   </div>
+  <ToastAlert ref="toastAlert"/>
 </template>
 
 <script lang="ts" setup>
@@ -31,15 +31,26 @@ import { QuillEditor } from '@vueup/vue-quill';
 import Breadcrumb from '../../partials/AppBreadcrumb.vue';
 import { ref, onMounted } from 'vue';
 import toolbarOptions from '@/hooks/toolbarOptions';
+import ToastAlert from "@/components/ToastAlert.vue";
+import axios from 'axios';
+import { CATEGORY_LIST_URL, BOARD_URL } from '@/constants/api';
+import CategorySelect from '@/components/boards/CategorySelect.vue';
+import { useRouter } from 'vue-router';
 
-const categoryOptions = ref([
-  { value: 'notice', label: '공지' },
-  { value: 'free', label: '자유게시판' },
-  { value: 'question', label: '질문' },
-]);
+const router = useRouter();
+const toastAlert = ref<InstanceType<typeof ToastAlert> | null >(null);
+
+interface Category {
+  bcno: number
+  name: string
+  parentBcno: number
+  depth: number;
+}
+
+const categories = ref<Category[]>([])
 
 const formData = ref({
-  category: '',
+  categories: null as number[] | null,
   title: '',
   content: '',
 });
@@ -47,7 +58,19 @@ const formData = ref({
 const quillEditorRef = ref<InstanceType<typeof QuillEditor> | null>(null);
 const quillInstance = ref<any | null>(null);
 
+const fetchCategoryList = async () => {
+  try{
+    const response = await axios.get<Category[]>(CATEGORY_LIST_URL,{
+        _verifyToken: true,
+      });
+    categories.value = response.data;
+  }catch(error){
+    toastAlert.value?.show('카테고리 조회 중 오류가 발생했습니다.', 'error');
+  }
+}
+
 onMounted(() => {
+  fetchCategoryList();
   if (quillEditorRef.value) {
     quillInstance.value = quillEditorRef.value.getQuill();
     console.log('Quill Instance:', quillInstance.value);
@@ -56,16 +79,32 @@ onMounted(() => {
 
 const getEditorHTML = () => {
   if (quillInstance.value) {
-    formData.value.content = quillInstance.value.root.innerHTML; // 여전히 root.innerHTML로 접근 가능한지 확인 필요
+    formData.value.content = quillInstance.value.root.innerHTML;
     console.log('HTML Content:', formData.value.content);
   }
 };
 
-const submitForm = () => {
+const submitForm = async () => {
   getEditorHTML();
-  console.log(formData.value);
-  alert('글이 작성되었습니다!');
-  formData.value.title = '';
-  formData.value.content = '';
+  try {
+    const response = await axios.post(BOARD_URL,{
+      title: formData.value.title,
+      content: formData.value.content,
+      categories: formData.value.categories
+      },
+    { 
+      _verifyToken: true
+    });
+    toastAlert.value?.show('게시글이 성공적으로 작성되었습니다.', 'success');
+    setTimeout(()=>{
+      formData.value.title = '';
+      formData.value.content = '';
+      formData.value.categories = null; // 초기화
+      router.push(`/boards/${response.data}`)
+    }, 2000)
+  } catch (error) {
+    console.error('게시글 작성 중 오류 발생:', error);
+    toastAlert.value?.show('게시글 작성 중 오류가 발생했습니다.', 'error');
+  }
 };
 </script>
