@@ -71,7 +71,7 @@
 </template>
 
 <script lang="ts" setup>
-import Breadcrumb from '../../partials/AppBreadcrumb.vue';
+import Breadcrumb from '../../components/AppBreadcrumb.vue';
 import { ref, onMounted } from 'vue';
 
 interface DaumPostcodeOptions {

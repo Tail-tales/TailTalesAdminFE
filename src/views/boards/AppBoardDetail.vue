@@ -162,7 +162,7 @@
 </template>
 
 <script lang="ts" setup>
-import Breadcrumb from '../../partials/AppBreadcrumb.vue';
+import Breadcrumb from '../../components/AppBreadcrumb.vue';
 import { ref, computed, onMounted } from 'vue';
 import LevelBadge from '../../components/users/LevelBadge.vue';
 import axios from 'axios';

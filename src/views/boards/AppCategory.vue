@@ -26,7 +26,7 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import Breadcrumb from '../../partials/AppBreadcrumb.vue'
+import Breadcrumb from '../../components/AppBreadcrumb.vue'
 import CategoryItem from '../../components/boards/CategoryItem.vue'
 import axios from 'axios'
 import ToastAlert from "@/components/ToastAlert.vue";

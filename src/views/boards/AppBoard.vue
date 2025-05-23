@@ -170,7 +170,7 @@
 <script setup lang="ts">
 import { useTableData } from '../../hooks/useTableData'
 const { wideTableData } = useTableData()
-import Breadcrumb from '../../partials/AppBreadcrumb.vue'
+import Breadcrumb from '../../components/AppBreadcrumb.vue'
 import { useRouter } from 'vue-router';
 import PaginationItem from '@/components/boards/PaginationItem.vue';
 import FilterForm from '@/components/FilterForm.vue';

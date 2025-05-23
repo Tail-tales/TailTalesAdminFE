@@ -81,10 +81,10 @@
 </template>
 
 <script lang="ts" setup>
-import Breadcrumb from '../partials/AppBreadcrumb.vue';
+import Breadcrumb from '../components/AppBreadcrumb.vue';
 import { ref } from 'vue';
 import LevelBadge from '../components/users/LevelBadge.vue';
-import StarRate from "../partials/AppStarRate.vue";
+import StarRate from "../components/AppStarRate.vue";
 import FilterForm from '@/components/FilterForm.vue';
 
 interface FileInfo {

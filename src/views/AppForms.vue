@@ -146,7 +146,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import Breadcrumb from '../partials/AppBreadcrumb.vue'
+import Breadcrumb from '../components/AppBreadcrumb.vue'
 
 interface User {
   username: string

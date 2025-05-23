@@ -100,12 +100,12 @@
 
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
-import Breadcrumb from '../partials/AppBreadcrumb.vue'
+import Breadcrumb from '../components/AppBreadcrumb.vue'
 import axios from 'axios'
 import { useAuthStore } from '@/stores/auth'
 import ToastAlert from "@/components/ToastAlert.vue";
 import { useRouter } from 'vue-router';
-import Modal from "@/partials/AppModal.vue";
+import Modal from "@/components/AppModal.vue";
 import { ADMIN_URL, ADMIN_UPDATE_URL, EMAIL_CHECK_URL } from '@/constants/api';
 
 const router = useRouter();

@@ -28,9 +28,9 @@
 
 <script lang="ts" setup>
 import { QuillEditor } from '@vueup/vue-quill';
-import Breadcrumb from '../../partials/AppBreadcrumb.vue';
+import Breadcrumb from '../../components/AppBreadcrumb.vue';
 import { ref, onMounted } from 'vue';
-import toolbarOptions from '@/hooks/toolbarOptions';
+import toolbarOptions from '@/constants/toolbarOptions';
 import ToastAlert from "@/components/ToastAlert.vue";
 import axios from 'axios';
 import { CATEGORY_LIST_URL, BOARD_URL } from '@/constants/api';

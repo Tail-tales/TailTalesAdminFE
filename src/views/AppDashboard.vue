@@ -333,8 +333,8 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import Banner from "../partials/AppBanner.vue";
-import Breadcrumb from "../partials/AppBreadcrumb.vue";
+import Banner from "../components/AppBanner.vue";
+import Breadcrumb from "../components/AppBreadcrumb.vue";
 interface User {
   name: string;
   email: string;
