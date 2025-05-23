@@ -1,5 +1,5 @@
 <template>
-  <Breadcrumb breadcrumb="board" />
+  <Breadcrumb breadcrumb="boards" />
 
   <h2 class="text-xl font-semibold leading-tight text-gray-700">글 작성</h2>
 

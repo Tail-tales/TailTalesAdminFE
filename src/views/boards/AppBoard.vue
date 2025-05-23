@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- Breadcrumb -->
-    <Breadcrumb breadcrumb="Board" />
+    <Breadcrumb breadcrumb="Boards" />
 
     <div class="mt-5">
       <FilterForm
@@ -25,6 +25,11 @@
                   <th
                     class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase bg-gray-100 border-b border-gray-200"
                   >
+                    Category
+                  </th>
+                  <th
+                    class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase bg-gray-100 border-b border-gray-200"
+                  >
                     Title
                   </th>
                   <th
@@ -37,11 +42,11 @@
                   >
                     view
                   </th>
-                  <th
+                  <!-- <th
                     class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase bg-gray-100 border-b border-gray-200"
                   >
                     Comments
-                  </th>
+                  </th> -->
                   <th
                     class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase bg-gray-100 border-b border-gray-200"
                   >
@@ -55,11 +60,18 @@
 
               <tbody class="bg-white">
                 <tr
-                  v-for="u in wideTableData"
-                  :key="u.id"
+                  v-for="u in boards?.dtoList"
+                  :key="u.bno"
                   class="cursor-pointer hover:bg-gray-100"
-                  @click="goToDetail(u.id)"
+                  @click="goToDetail(u.bno)"
                 >
+
+                  <td
+                    class="px-6 py-4 border-b border-gray-200 whitespace-nowrap"
+                  >
+                    {{ formatCategories(u.categories) }}
+                  </td>
+
                   <td
                     class="px-6 py-4 border-b border-gray-200 whitespace-nowrap"
                   >
@@ -81,14 +93,14 @@
                   <td
                     class="px-6 py-4 text-sm leading-5 text-gray-500 border-b border-gray-200 whitespace-nowrap"
                   >
-                    {{ u.count }}
+                    {{ u.viewCnt }}
                   </td>
 
-                  <td
+                  <!-- <td
                     class="px-6 py-4 text-sm leading-5 text-gray-500 border-b border-gray-200 whitespace-nowrap"
                   >
                     {{ u.comments }}
-                  </td>
+                  </td> -->
 
                   <td
                     class="px-6 py-4 text-sm leading-5 text-gray-500 border-b border-gray-200 whitespace-nowrap"
@@ -143,9 +155,10 @@
           </div>
           <div class="flex justify-center mt-4">
             <PaginationItem
-              :total-items="100"
-              :items-per-page="10"
+              :total-items="boards?.totalCount || 0"
+              :items-per-page="boards?.pageRequestDto.size || 10"
               :max-visible-pages="5"
+              @page-change="handlePageChange"
             />
           </div>
         </div>
@@ -161,9 +174,69 @@ import Breadcrumb from '../../partials/AppBreadcrumb.vue'
 import { useRouter } from 'vue-router';
 import PaginationItem from '@/components/boards/PaginationItem.vue';
 import FilterForm from '@/components/FilterForm.vue';
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
+import ToastAlert from '@/components/ToastAlert.vue';
+import axios from 'axios';
+import { BOARD_LIST_URL } from '@/constants/api';
+import { sortCode } from '@/constants/sortCode';
 
 const router = useRouter();
+const toastAlert = ref<InstanceType<typeof ToastAlert> | null >(null);
+
+interface BoardDto {
+  bno: number;
+  title: string;
+  name: string;
+  viewCnt: number;
+  createdAt: string;
+  categories: string[];
+}
+
+interface PagingDto {
+  page: number;
+  size: number;
+}
+
+interface BoardsDto {
+  dtoList: BoardDto[];
+  pageRequestDto: PagingDto;
+  totalCount: number;
+  pageNumList: number[];
+  prev: boolean;
+  next: boolean;
+  prevPage: number;
+  nextPage: number;
+  totalPage: number;
+  current: number;
+}
+
+const boards = ref<BoardsDto | null>(null);
+const currentPage = ref(1);
+const sort = ref<string>('')
+
+const fetchBoardList = async () => {
+  try{
+    const response = await axios.get<BoardsDto>(
+      `${BOARD_LIST_URL}?page=${currentPage.value}&sort=${sort.value}`, {
+      _verifyToken: true,
+    },);
+    boards.value = response.data;
+  }catch(error){
+    toastAlert.value?.show('게시글 조회 중 오류가 발생했습니다', 'error');
+  }
+}
+
+onMounted(()=>{
+  fetchBoardList();
+})
+
+const formatCategories = (categories: string[]) => {
+  if (!categories || categories.length === 0) return "";
+
+  const formattedCategories = categories.join("〉");
+
+  return formattedCategories
+}
 
 const filterConditions = ref({});
 const searchTerm = ref('');
@@ -175,10 +248,24 @@ const goToDetail = (id: number) => {
 const handleFiltersUpdate = (filters: { [key: string]: string }) => {
   filterConditions.value = filters;
   console.log('선택된 필터:', filters);
+
+  if ( filters.sort !== undefined){
+    sort.value = sortCode[filters.sort] || '';
+  }
+
+  currentPage.value = 1;
+  fetchBoardList();
 };
 
 const handleSearchTermUpdate = (term: string) => {
   searchTerm.value = term;
   console.log('검색어:', term);
+  currentPage.value = 1;
+  fetchBoardList();
 };
+
+const handlePageChange = (page: number) => {
+  currentPage.value = page;
+  fetchBoardList();
+}
 </script>

@@ -1,5 +1,5 @@
 <template>
-  <Breadcrumb breadcrumb="board" />
+  <Breadcrumb breadcrumb="boards" />
 
   <div v-if="boardDetail" class="mt-5">
     <div class="flex items-center justify-between">
