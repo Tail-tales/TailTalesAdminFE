@@ -6,7 +6,7 @@
         <span class="text-2xl font-semibold text-gray-700">TailTales</span>
       </div>
 
-      <form class="mt-4" @submit.prevent="login">
+      <form class="mt-4" @submit.prevent="handleLogin">
         <label class="block">
           <input
             type="text"
@@ -88,41 +88,30 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import axios, { AxiosError } from "axios";
 import { useAuthStore } from "@/stores/auth";
 import ToastAlert from "@/components/ToastAlert.vue";
-import { LOGIN_URL } from "@/constants/api";
+import { login } from "@/services/authService";
+import { AxiosError } from "axios";
 
 const router = useRouter();
 const id = ref("");
 const password = ref("");
 const toastAlert = ref<InstanceType<typeof ToastAlert> | null >(null);
 
-async function login() {
+async function handleLogin() {
   try {
-    const response = await axios.post(LOGIN_URL, {
-      id : id.value,
-      password : password.value
-    },{
-      withCredentials: true
-    })
+    const responseData = await login({
+      id: id.value,
+      password: password.value
+    });
 
-    if (response.status === 200){
-      const accessToken = response.data.accessToken;
-      const adminId = response.data.id;
-      if (accessToken && adminId) {
-        useAuthStore().loginSuccess(accessToken, adminId);
-        router.push("/dashboard");
-      } else{
-        toastAlert.value?.show('Access Token이 존재하지 않습니다.', 'error');
-      }
-    }
+    const accessToken = responseData.accessToken;
+    const adminId = responseData.id;
+    useAuthStore().loginSuccess(accessToken, adminId);
+    router.push("/dashboard");
+      
   } catch (error: AxiosError) {
-    if (error.response.status === 403) {
-        toastAlert.value?.show('아이디 또는 비밀번호가 잘못되었습니다.', 'error');
-      } else {
-        toastAlert.value?.show('로그인인 요청 중 오류가 발생했습니다.', 'error');
-      }
+    toastAlert.value?.show(error.response.data.message, 'error');
   }
 }
 

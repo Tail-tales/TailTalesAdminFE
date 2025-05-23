@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import axios from 'axios';
 import { LOGOUT_URL, REFRESH_URL } from '@/constants/api';
+import { logout, refreshAccessToken } from '@/services/authService';
 
 export const useAuthStore = defineStore('auth', () => {
   // State
@@ -44,9 +45,9 @@ export const useAuthStore = defineStore('auth', () => {
         sessionStorage.setItem('id', id);
     }
     
-    async function logout() {
+    async function handleLogout() {
         try {
-            await axios.post(LOGOUT_URL);
+            await logout();
             clearAccessToken();
             sessionStorage.removeItem('id');
             console.log('로그아웃 완료 및 Access Token, id 제거');
@@ -60,13 +61,8 @@ export const useAuthStore = defineStore('auth', () => {
     // Access Token 갱신 액션
     async function refreshToken() {
         try {
-          const response = await axios.post(REFRESH_URL, null,{
-            withCredentials: true,
-            headers: {
-              Authorization: null
-            }
-          });
-          const newAccessToken = response.data.accessToken;
+          const responseData = await refreshAccessToken();
+          const newAccessToken = responseData.accessToken;
           setAccessToken(newAccessToken);
           console.log('Access Token 갱신 성공');
           return true; // 갱신 성공
@@ -78,5 +74,5 @@ export const useAuthStore = defineStore('auth', () => {
         }
     }
 
-    return { accessToken, isloggedIn, currentAdminId, setAccessToken, setAdminId, clearAccessToken, loginSuccess, logout, refreshToken };
+    return { accessToken, isloggedIn, currentAdminId, setAccessToken, setAdminId, clearAccessToken, loginSuccess, handleLogout, refreshToken };
 });
