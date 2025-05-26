@@ -84,7 +84,7 @@ const routes: Array<RouteRecordRaw> = [
     component: PlaceWrite,
   },
   {
-    path: "/review",
+    path: "/reviews",
     name: "Review",
     component: Review,
   },
