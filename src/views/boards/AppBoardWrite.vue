@@ -8,7 +8,6 @@
       <div>
         <CategorySelect 
           v-model="formData.categories"
-          :categories="categories"
           placeholder="카테고리 선택"
         />
       </div>
@@ -33,21 +32,12 @@ import { ref, onMounted } from 'vue';
 import toolbarOptions from '@/constants/toolbarOptions';
 import ToastAlert from "@/components/ToastAlert.vue";
 import axios from 'axios';
-import { CATEGORY_LIST_URL, BOARD_URL } from '@/constants/api';
+import { BOARD_URL } from '@/constants/api';
 import CategorySelect from '@/components/boards/CategorySelect.vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const toastAlert = ref<InstanceType<typeof ToastAlert> | null >(null);
-
-interface Category {
-  bcno: number
-  name: string
-  parentBcno: number
-  depth: number;
-}
-
-const categories = ref<Category[]>([])
 
 const formData = ref({
   categories: null as number[] | null,
@@ -58,19 +48,7 @@ const formData = ref({
 const quillEditorRef = ref<InstanceType<typeof QuillEditor> | null>(null);
 const quillInstance = ref<any | null>(null);
 
-const fetchCategoryList = async () => {
-  try{
-    const response = await axios.get<Category[]>(CATEGORY_LIST_URL,{
-        _verifyToken: true,
-      });
-    categories.value = response.data;
-  }catch(error){
-    toastAlert.value?.show('카테고리 조회 중 오류가 발생했습니다.', 'error');
-  }
-}
-
 onMounted(() => {
-  fetchCategoryList();
   if (quillEditorRef.value) {
     quillInstance.value = quillEditorRef.value.getQuill();
     console.log('Quill Instance:', quillInstance.value);
