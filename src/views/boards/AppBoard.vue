@@ -6,6 +6,7 @@
     <div class="mt-5">
       <FilterForm
         :filters="[
+          { key: 'category', label: '카테고리', options:categoryStore.flatCategoryNames },
           { key: 'sort', label: '정렬', options: ['최신순', '오래된순', '조회수순', '댓글순', '즐겨찾기순'] },
         ]"
         @update:filters="handleFiltersUpdate"
@@ -58,7 +59,7 @@
                 </tr>
               </thead>
 
-              <tbody class="bg-white">
+              <tbody class="bg-white" v-if="boards && boards.dtoList.length > 0">
                 <tr
                   v-for="u in boards?.dtoList"
                   :key="u.bno"
@@ -151,6 +152,13 @@
                   </td>
                 </tr>
               </tbody>
+              <tbody v-else>
+                <tr>
+                  <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                    작성된 게시글이 없습니다.
+                  </td>
+                </tr>
+              </tbody>
             </table>
           </div>
           <div class="flex justify-center mt-4">
@@ -177,11 +185,13 @@ import FilterForm from '@/components/FilterForm.vue';
 import { onMounted, ref } from 'vue';
 import ToastAlert from '@/components/ToastAlert.vue';
 import axios from 'axios';
-import { BOARD_LIST_URL } from '@/constants/api';
+import { BOARD_CTG_URL } from '@/constants/api';
 import { sortCode } from '@/constants/sortCode';
+import { useCategoryStore } from '@/stores/category'
 
 const router = useRouter();
 const toastAlert = ref<InstanceType<typeof ToastAlert> | null >(null);
+const categoryStore = useCategoryStore();
 
 interface BoardDto {
   bno: number;
@@ -189,7 +199,7 @@ interface BoardDto {
   name: string;
   viewCnt: number;
   createdAt: string;
-  categories: string[];
+  categories: number[];
 }
 
 interface PagingDto {
@@ -213,13 +223,20 @@ interface BoardsDto {
 const boards = ref<BoardsDto | null>(null);
 const currentPage = ref(1);
 const sort = ref<string>('')
+const selectedCategoryIds = ref<number[]>([]);
 
 const fetchBoardList = async () => {
   try{
+
+    if (categoryStore.flatDisplayedCategories.length === 0 && !categoryStore.isFetchingCategories) {
+      await categoryStore.fetchAndProcessCategories();
+    }
+    console.log(`${BOARD_CTG_URL}?categoryIds=${selectedCategoryIds.value}&page=${currentPage.value}&sort=${sort.value}`)
     const response = await axios.get<BoardsDto>(
-      `${BOARD_LIST_URL}?page=${currentPage.value}&sort=${sort.value}`, {
+      `${BOARD_CTG_URL}?categoryIds=${selectedCategoryIds.value}&page=${currentPage.value}&sort=${sort.value}`, {
       _verifyToken: true,
     },);
+
     boards.value = response.data;
   }catch(error){
     toastAlert.value?.show('게시글 조회 중 오류가 발생했습니다', 'error');
@@ -230,12 +247,15 @@ onMounted(()=>{
   fetchBoardList();
 })
 
-const formatCategories = (categories: string[]) => {
-  if (!categories || categories.length === 0) return "";
+const formatCategories = (categoryIds: number[]) => {
+  if (!categoryIds || categoryIds.length === 0) return "";
 
-  const formattedCategories = categories.join("〉");
+  const categoryNames = categoryIds.map(id => {
+    const category = categoryStore.getCategoryById(id);
+    return category ? category.name : `알 수 없는 카테고리 (${id})`;
+  }).filter(name => name !== null);
 
-  return formattedCategories
+  return categoryNames.join("〉")
 }
 
 const filterConditions = ref({});
@@ -251,6 +271,24 @@ const handleFiltersUpdate = (filters: { [key: string]: string }) => {
 
   if ( filters.sort !== undefined){
     sort.value = sortCode[filters.sort] || '';
+  }
+
+  if (filters.category !== undefined) {
+    const selectedDisplayName = filters.category;
+    if (selectedDisplayName === '전체') {
+      selectedCategoryIds.value = [];
+    } else {
+      const foundCategory = categoryStore.flatDisplayedCategories.find(
+        cat => cat.name === selectedDisplayName
+      );
+      if (foundCategory) {
+        selectedCategoryIds.value = [foundCategory.id];
+      } else {
+        selectedCategoryIds.value = [];
+      }
+    }
+  } else {
+    selectedCategoryIds.value = []; // 카테고리 필터가 설정되지 않았으면 비움
   }
 
   currentPage.value = 1;

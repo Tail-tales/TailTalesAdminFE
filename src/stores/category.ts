@@ -60,6 +60,14 @@ export const useCategoryStore = defineStore('category', () => {
     return categoryMap.value.get(id);
   });
 
+  const flatCategoryNames = computed(() => {
+    const names = ['전체'];
+    flatDisplayedCategories.value.forEach(cat => {
+      names.push(cat.name);
+    })
+    return names
+  })
+
 
   const fetchAndProcessCategories = async () => {
     isFetchingCategories.value = true;
@@ -355,6 +363,7 @@ export const useCategoryStore = defineStore('category', () => {
     // --- 게터 (Getters) ---
     selectedCategoryDisplayName, // CategoryDropdown용
     getCategoryById,             // 공통 유틸리티 게터
+    flatCategoryNames,           // 평탄화된 카테고리명 배열
 
     // --- 액션 (Actions) ---
     fetchAndProcessCategories, // 공통: 데이터 로드 및 가공
