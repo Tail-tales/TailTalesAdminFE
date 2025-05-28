@@ -25,8 +25,8 @@ setupAxiosInterceptors(router);
 app.mount("#app");
 
 const authStore = useAuthStore();
-const storedToken = localStorage.getItem('accessToken')
-const storedId = localStorage.getItem('id')
+const storedToken = sessionStorage.getItem('accessToken')
+const storedId = sessionStorage.getItem('id')
 
 if (storedToken && storedId) {
     authStore.setAccessToken(storedToken);

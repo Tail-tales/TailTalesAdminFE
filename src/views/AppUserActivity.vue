@@ -105,5 +105,5 @@
 <script lang="ts" setup>
 import { useTableData } from '../hooks/useTableData'
 const { simpleTableData } = useTableData()
-import Breadcrumb from '../partials/AppBreadcrumb.vue'
+import Breadcrumb from '../components/AppBreadcrumb.vue'
 </script>

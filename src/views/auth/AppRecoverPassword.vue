@@ -86,8 +86,9 @@
   import { ref } from "vue";
   import { useRouter } from "vue-router";
   import ToastAlert from "@/components/ToastAlert.vue";
-  import axios, { AxiosError } from "axios";
-  import { FIND_PW_URL } from "@/constants/api";
+  import { AxiosError } from "axios";
+import { findPassword } from "@/services/authService";
+
   
   const router = useRouter();
   const isLoading = ref(false);
@@ -98,20 +99,12 @@
     isLoading.value = true;
 
     try {
-      const response = await axios.post(FIND_PW_URL, null, {
-      params: {
-        id: id.value
-      }});
-      if( response.status === 200 ){
-        toastAlert.value?.show(response.data, 'success');
-        isLoading.value = false;
-      }
+      const responseData = await findPassword(id.value);
+
+      toastAlert.value?.show(responseData, 'success');
+      isLoading.value = false;  
     } catch (error: AxiosError) {
-      if (error.response && error.response.status === 404) {
-        toastAlert.value?.show("해당 아이디를 찾을 수 없습니다.", 'error');
-      } else {
-        toastAlert.value?.show('임시 비밀번호 전송 중 오류가 발생했습니다.', 'error');
-      }
+      toastAlert.value?.show(error.response.data.message, 'error');
       isLoading.value = false;
     }
   }

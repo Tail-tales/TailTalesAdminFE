@@ -32,14 +32,22 @@ import { ref, onMounted } from 'vue';
 import toolbarOptions from '@/constants/toolbarOptions';
 import ToastAlert from "@/components/ToastAlert.vue";
 import axios from 'axios';
-import { BOARD_URL } from '@/constants/api';
+import { BOARD_URL, BOARD_EDIT_URL } from '@/constants/api';
 import CategorySelect from '@/components/boards/CategorySelect.vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const toastAlert = ref<InstanceType<typeof ToastAlert> | null >(null);
 
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
+  }
+})
+
 const formData = ref({
+  bno: 0,
   categories: null as number[] | null,
   title: '',
   content: '',
@@ -48,11 +56,26 @@ const formData = ref({
 const quillEditorRef = ref<InstanceType<typeof QuillEditor> | null>(null);
 const quillInstance = ref<any | null>(null);
 
+const fetchBoardDetail = async (id: number) => {
+  try {
+    const response = await axios.get(`${BOARD_URL}/${id}`, {
+      _verifyToken: true,
+    });
+    formData.value.bno = response.data.bno;
+    formData.value.title = response.data.title;
+    quillInstance.value.root.innerHTML = response.data.content;
+    formData.value.categories = response.data.categories;
+  } catch (error) {
+    console.error(`게시글 ${id} 조회 중 오류 발생:`, error);
+  }
+};
+
 onMounted(() => {
   if (quillEditorRef.value) {
     quillInstance.value = quillEditorRef.value.getQuill();
     console.log('Quill Instance:', quillInstance.value);
   }
+  fetchBoardDetail(props.id);
 });
 
 const getEditorHTML = () => {
@@ -65,7 +88,8 @@ const getEditorHTML = () => {
 const submitForm = async () => {
   getEditorHTML();
   try {
-    const response = await axios.post(BOARD_URL,{
+    const response = await axios.patch(BOARD_EDIT_URL,{
+      bno: formData.value.bno,
       title: formData.value.title,
       content: formData.value.content,
       categories: formData.value.categories
@@ -73,12 +97,12 @@ const submitForm = async () => {
     { 
       _verifyToken: true
     });
-    toastAlert.value?.show('게시글이 성공적으로 작성되었습니다.', 'success');
+    toastAlert.value?.show('게시글이 성공적으로 수정되었습니다.', 'success');
     setTimeout(()=>{
-      formData.value.title = '';
-      formData.value.content = '';
-      formData.value.categories = null; // 초기화
-      router.push(`/boards/${response.data}`)
+      // formData.value.title = '';
+      // formData.value.content = '';
+      // formData.value.categories = null; // 초기화
+      router.push(`/boards/${response.data.bno}`)
     }, 2000)
   } catch (error) {
     console.error('게시글 작성 중 오류 발생:', error);

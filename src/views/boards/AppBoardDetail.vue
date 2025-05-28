@@ -1,7 +1,7 @@
 <template>
-  <Breadcrumb breadcrumb="board" />
+  <Breadcrumb breadcrumb="boards" />
 
-  <div class="mt-5">
+  <div v-if="boardDetail" class="mt-5">
     <div class="flex items-center justify-between">
       <div class="flex items-center">
         <div class="flex-shrink-0 w-10 h-10">
@@ -13,11 +13,11 @@
         </div>
         <div class="ml-4">
           <div class="text-sm font-medium leading-5 text-gray-900">
-            코코
+            {{ boardDetail.name }}
             <LevelBadge level="Bear 🐻‍❄️" levelColor="indigo" />
           </div>
           <div class="text-sm leading-5 text-gray-500">
-            2025-04-15
+            {{ boardDetail.createdAt.slice(0,10) }}
           </div>
         </div>
       </div>
@@ -36,7 +36,46 @@
         </button>
         <div class="flex items-center text-gray-500">
           조회
-          <span class="ml-1 text-sm">{{ viewCount }}</span>
+          <span class="ml-1 text-sm">{{ boardDetail.viewCnt }}</span>
+        </div>
+        <div v-if="boardDetail.name == authStore.currentAdminId" class="relative inline-block text-center mt-2">
+          <button @click.stop="toggleDropdown()">
+            <svg fill="#6b7280" version="1.1" id="Layer_1" xmlns:x="&amp;ns_extend;" xmlns:i="&amp;ns_ai;" xmlns:graph="&amp;ns_graphs;" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="20px" height="20px" viewBox="0 0 24 24" enable-background="new 0 0 24 24" xml:space="preserve" transform="rotate(90)">
+            <g id="SVGRepo_bgCarrier" stroke-width="0"/>
+            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"/>
+            <g id="SVGRepo_iconCarrier"> <metadata> <sfw> <slices> </slices> <slicesourcebounds width="505" height="984" bottomleftorigin="true" x="0" y="-120"> </slicesourcebounds> </sfw> </metadata> <g> <g> <g> <path d="M12,24C5.4,24,0,18.6,0,12S5.4,0,12,0s12,5.4,12,12S18.6,24,12,24z M12,2C6.5,2,2,6.5,2,12s4.5,10,10,10s10-4.5,10-10 S17.5,2,12,2z"/> </g> </g> <g> <g> <circle cx="7" cy="12" r="2"/> </g> </g> <g> <g> <circle cx="12" cy="12" r="2"/> </g> </g> <g> <g> <circle cx="17" cy="12" r="2"/> </g> </g> </g> </g>
+            </svg>
+          </button>
+          <div
+              v-if="isDropdownOpen"
+              class="origin-top-right absolute right-0 mt-2 w-24 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10"
+              role="menu"
+              aria-orientation="vertical"
+              aria-labelledby="board-detail-menu-button"
+              tabindex="-1"
+              @click.stop
+            >
+              <div class="py-1" role="none">
+                <a
+                  href="#"
+                  @click.prevent="goToEdit(boardDetail.bno); closeDropdown();"
+                  class="text-gray-700 block px-4 py-2 text-sm hover:bg-gray-100"
+                  role="menuitem"
+                  tabindex="-1"
+                  id="board-detail-item-0"
+                  >수정</a
+                >
+                <a
+                  href="#"
+                  @click.prevent="deleteBoard(boardDetail.bno); closeDropdown();"
+                  class="text-gray-700 block px-4 py-2 text-sm hover:bg-gray-100"
+                  role="menuitem"
+                  tabindex="-1"
+                  id="board-detail-item-2"
+                  >삭제</a
+                >
+              </div>
+            </div>
         </div>
       </div>
     </div>
@@ -45,8 +84,8 @@
       class="mt-5 bg-gray-100 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
       v-if="post"
     >
-      <h2 class="text-xl font-semibold mb-2">{{ post.title }}</h2>
-      <p>{{ post.content }}</p>
+      <h2 class="text-xl font-semibold mb-2">{{ boardDetail.title }}</h2>
+      <p class="ql-editor" v-html="boardDetail.content"></p>
 
       <div v-if="post.files && post.files.length > 0" class="mt-4">
         <div class="flex space-x-2">
@@ -162,9 +201,23 @@
 </template>
 
 <script lang="ts" setup>
-import Breadcrumb from '../../partials/AppBreadcrumb.vue';
-import { ref, computed } from 'vue';
+import Breadcrumb from '../../components/AppBreadcrumb.vue';
+import { ref, computed, onMounted } from 'vue';
 import LevelBadge from '../../components/users/LevelBadge.vue';
+import axios from 'axios';
+import { BOARD_URL } from '@/constants/api';
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
+
+const router = useRouter();
+const authStore = useAuthStore();
+
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
+  }
+})
 
 interface FileInfo {
   name: string;
@@ -176,16 +229,73 @@ interface Comment {
   imagePreview: string | null;
 }
 
+interface boardInfo {
+  bno: number;
+  title: string;
+  name: string;
+  content: string;
+  viewCnt: number;
+  createdAt: string;
+  updatedAt: string | null;
+  categories: string[]; // 왜 얘는 string이지..?
+}
+
+const boardDetail = ref<boardInfo | null>(null)
+const isDropdownOpen = ref(false);
+
+const toggleDropdown = () => {
+  isDropdownOpen.value = !isDropdownOpen.value;
+}
+
+const closeDropdown = () => {
+  isDropdownOpen.value = false;
+};
+
+const goToEdit = (id: number) => {
+  router.push(`/boards/write/${id}`);
+};
+
+const deleteBoard = async (id: number) => {
+    try {
+      await axios.delete(`${BOARD_URL}/${id}`, {
+        _verifyToken: true,
+      });
+      router.push('/boards');
+    } catch (error) {
+      console.error('게시글 삭제 중 오류 발생:', error);
+    }
+};
+
+const fetchBoardDetail = async (id: number) => {
+  try {
+    const response = await axios.get(`${BOARD_URL}/${id}`, {
+      _verifyToken: true,
+    });
+    boardDetail.value = response.data;
+    console.log('게시글 상세 데이터:', boardDetail.value);
+  } catch (error) {
+    console.error(`게시글 ${id} 조회 중 오류 발생:`, error);
+  }
+};
+
+onMounted(() => {
+  fetchBoardDetail(props.id);
+});
+
 // 예시 데이터 (실제로는 API 호출 등을 통해 가져와야 합니다.)
 const post = ref({
-  id: 1,
+  bno: 1,
   title: '안녕하세요 가입인사 드립니다',
-  content: '이런 커뮤니티가 있는 줄 몰랐는데 정말 좋네요 앞으로 많이 활동하겠습니다!!',
+  name: '코코',
+  content: '<b>이런 커뮤니티가 있는 줄 몰랐는데 정말 좋네요 앞으로 많이 활동하겠습니다!!</b>',
+  viewCnt: 3,
   createdAt: '2025-04-15 14:17:00',
+  updatedAt: '',
   files: [
     { name: 'image1.png', url: 'https://placehold.co/150' },
     { name: 'image2.jpg', url: 'https://placehold.co/100' },
   ] as FileInfo[],
+  categories: ['event'],
 });
 
 const newComment = ref('');
@@ -194,7 +304,6 @@ const commentImagePreview = ref<string | null>(null);
 const comments = ref<Comment[]>([]);
 const isFavorite = ref(false);
 const favoriteCount = ref(2); // 초기 즐겨찾기 수
-const viewCount = ref(10); // 초기 조회수
 
 const imageFiles = computed(() => {
   return post.value?.files?.filter(file => isImage(file.name)) || [];
@@ -246,11 +355,4 @@ const toggleFavorite = () => {
     // 실제 백엔드 연동 시 즐겨찾기 제거 API 호출
   }
 };
-
-// 컴포넌트가 마운트될 때 조회수를 증가시키는 예시 (실제로는 백엔드에서 처리하는 것이 일반적입니다.)
-import { onMounted } from 'vue';
-onMounted(() => {
-  viewCount.value++;
-  // 실제 백엔드 연동 시 조회수 증가 API 호출
-});
 </script>

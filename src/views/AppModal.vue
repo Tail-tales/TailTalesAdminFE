@@ -90,7 +90,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import Breadcrumb from '../partials/AppBreadcrumb.vue'
+import Breadcrumb from '../components/AppBreadcrumb.vue'
 
 const open = ref(false)
 </script>
