@@ -16,6 +16,7 @@ import UserActivity from "../views/AppUserActivity.vue";
 import Board from "../views/boards/AppBoard.vue";
 import Category from "../views/boards/AppCategory.vue";
 import BoardWrite from "../views/boards/AppBoardWrite.vue";
+import BoardEdit from "../views/boards/AppBoardEdit.vue";
 import BoardDetail from "../views/boards/AppBoardDetail.vue";
 import Places from "../views/places/AppPlace.vue";
 import PlaceWrite from "../views/places/AppPlaceWrite.vue";
@@ -67,6 +68,12 @@ const routes: Array<RouteRecordRaw> = [
     path: "/boards/write",
     name: "BoardWrite",
     component: BoardWrite,
+  },
+  {
+    path: "/boards/write/:id",
+    name: "BoardEdit",
+    component: BoardEdit,
+    props: true,
   },
   {
     path: "/category",

@@ -106,7 +106,7 @@
                   <td
                     class="px-6 py-4 text-sm leading-5 text-gray-500 border-b border-gray-200 whitespace-nowrap"
                   >
-                    {{ u.createdAt }}
+                    {{ u.createdAt.slice(0,10) }}
                   </td>
 
                   <td
@@ -114,7 +114,7 @@
                   >
                     <div class="flex justify-around">
                       <span class="text-yellow-500 flex justify-center">
-                        <a href="#" class="mx-2 px-2 rounded-md"
+                        <button @click.stop="goToEdit(u.bno)" class="mx-2 px-2 rounded-md"
                           ><svg
                             xmlns="http://www.w3.org/2000/svg"
                             class="h-5 w-5 text-green-700"
@@ -130,23 +130,21 @@
                               clip-rule="evenodd"
                             />
                           </svg>
-                        </a>
-                        <form method="POST">
-                          <button class="mx-2 px-2 rounded-md">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              class="h-5 w-5 text-red-700"
-                              viewBox="0 0 20 20"
-                              fill="currentColor"
-                            >
-                              <path
-                                fill-rule="evenodd"
-                                d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                                clip-rule="evenodd"
-                              />
-                            </svg>
-                          </button>
-                        </form>
+                        </button>
+                        <button @click.stop="deleteBoard(u.bno)" class="mx-2 px-2 rounded-md">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-5 w-5 text-red-700"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fill-rule="evenodd"
+                              d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                              clip-rule="evenodd"
+                            />
+                          </svg>
+                        </button>
                       </span>
                     </div>
                   </td>
@@ -173,6 +171,7 @@
       </div>
     </div>
   </div>
+  <ToastAlert ref="toastAlert"/>
 </template>
 
 <script setup lang="ts">
@@ -185,7 +184,7 @@ import FilterForm from '@/components/FilterForm.vue';
 import { onMounted, ref } from 'vue';
 import ToastAlert from '@/components/ToastAlert.vue';
 import axios from 'axios';
-import { BOARD_CTG_URL } from '@/constants/api';
+import { BOARD_URL, BOARD_CTG_URL } from '@/constants/api';
 import { sortCode } from '@/constants/sortCode';
 import { useCategoryStore } from '@/stores/category'
 
@@ -238,8 +237,8 @@ const fetchBoardList = async () => {
     },);
 
     boards.value = response.data;
-  }catch(error){
-    toastAlert.value?.show('게시글 조회 중 오류가 발생했습니다', 'error');
+  }catch(error: AxiosError){
+    toastAlert.value?.show(error.response.data.message, 'error');
   }
 }
 
@@ -263,6 +262,25 @@ const searchTerm = ref('');
 
 const goToDetail = (id: number) => {
   router.push(`/boards/${id}`);
+}
+
+const goToEdit = (id: number) => {
+  router.push(`/boards/write/${id}`)
+}
+
+const deleteBoard = async (id: number) => {
+  try{
+    const response = await axios.delete(`${BOARD_URL}/${id}`,{
+      _verifyToken: true,
+    })
+
+    if( response.status === 200 ){
+      toastAlert.value?.show(response.data,'success');
+    }
+    fetchBoardList();
+  }catch (error: AxiosError) {
+    toastAlert.value?.show(error.response.data.message, 'error')
+  }
 }
 
 const handleFiltersUpdate = (filters: { [key: string]: string }) => {
