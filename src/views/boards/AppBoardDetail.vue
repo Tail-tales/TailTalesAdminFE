@@ -184,7 +184,7 @@ import Breadcrumb from '../../components/AppBreadcrumb.vue';
 import { ref, onMounted } from 'vue';
 import LevelBadge from '../../components/users/LevelBadge.vue';
 import axios from 'axios';
-import { BOARD_URL } from '@/constants/api';
+import { BOARD_URL, IMAGE_URL } from '@/constants/api';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 
@@ -203,6 +203,13 @@ interface Comment {
   imagePreview: string | null;
 }
 
+interface ImageInfo {
+  imgName: string;
+  thumbnailUrl: string;
+  imgUrl: string;
+  imgServiceId: string;
+}
+
 interface boardInfo {
   bno: number;
   title: string;
@@ -212,6 +219,7 @@ interface boardInfo {
   createdAt: string;
   updatedAt: string | null;
   categories: string[]; // 왜 얘는 string이지..?
+  images: ImageInfo[];
 }
 
 const boardDetail = ref<boardInfo | null>(null)
@@ -234,6 +242,18 @@ const deleteBoard = async (id: number) => {
       await axios.delete(`${BOARD_URL}/${id}`, {
         _verifyToken: true,
       });
+      if(boardDetail.value?.images && boardDetail.value.images.length > 0){
+         await Promise.all(
+        boardDetail.value.images.map(async (image) => {
+          try {
+            await axios.delete(`${IMAGE_URL}/${image.imgServiceId}`);
+            console.log(`이미지 삭제 성공: ${image.imgServiceId}`);
+          } catch (imageDeleteError) {
+            console.error(`이미지 삭제 실패: ${image.imgServiceId}`, imageDeleteError);
+          }
+        })
+      );
+    }
       router.push('/boards');
     } catch (error) {
       console.error('게시글 삭제 중 오류 발생:', error);
