@@ -23,3 +23,5 @@ export const CATEGORY_EDIT_URL = `${CATEGORY_URL}/edit`;
 export const CATEGORY_UPDATE_URL = `${CATEGORY_URL}/changes`;
 
 export const USER_URL = `${ADMIN_URL}/users`;
+
+export const IMAGE_URL = `${API_BASE_URL}/api/upload`

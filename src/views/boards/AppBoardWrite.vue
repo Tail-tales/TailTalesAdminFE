@@ -32,17 +32,32 @@ import { ref, onMounted } from 'vue';
 import toolbarOptions from '@/constants/toolbarOptions';
 import ToastAlert from "@/components/ToastAlert.vue";
 import axios from 'axios';
-import { BOARD_URL } from '@/constants/api';
+import { BOARD_URL, IMAGE_URL } from '@/constants/api';
 import CategorySelect from '@/components/boards/CategorySelect.vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const toastAlert = ref<InstanceType<typeof ToastAlert> | null >(null);
 
+interface ImageInfo {
+  imgName: string;
+  thumbnailUrl: string;
+  imgUrl: string;
+  imgServiceId: string;
+}
+
+interface ImageRes {
+  fileName: string;
+  thumbnailUrl: string;
+  fileUrl: string;
+  serviceId: string;
+}
+
 const formData = ref({
   categories: null as number[] | null,
   title: '',
   content: '',
+  images: [] as ImageInfo[]
 });
 
 const quillEditorRef = ref<InstanceType<typeof QuillEditor> | null>(null);
@@ -51,9 +66,67 @@ const quillInstance = ref<any | null>(null);
 onMounted(() => {
   if (quillEditorRef.value) {
     quillInstance.value = quillEditorRef.value.getQuill();
-    console.log('Quill Instance:', quillInstance.value);
+    
+    if (quillInstance.value) {
+      quillInstance.value.getModule('toolbar').addHandler('image', ImageUpload);
+      console.log('Quill Instance:', quillInstance.value);
+    }
   }
 });
+
+const ImageUpload = () => {
+  const input = document.createElement('input');
+  input.setAttribute('type', 'file');
+  input.setAttribute('accept', 'image/*');
+  input.setAttribute('multiple', 'true');
+  input.click();
+
+  input.onchange = async () => {
+    if (!input.files || input.files.length === 0) return;
+
+    const uploadImageData = new FormData();
+
+    for (let i = 0; i < input.files.length; i++){
+      uploadImageData.append('files', input.files[i]);
+    }
+
+    try {
+      const response = await axios.post(IMAGE_URL,
+        uploadImageData,
+        {
+          headers: {
+            'Content-Type' : 'multipart/form-data'
+          }
+        }
+      );
+
+      const imageUrls = response.data as ImageRes[];
+
+      if (imageUrls && imageUrls.length > 0) {
+        const quill = quillInstance.value;
+        const range = quill.getSelection(true);
+        let currentIndex = range.index;
+
+        imageUrls.forEach((imageInfo) => {
+          const fileUrl = imageInfo.fileUrl;
+          if (fileUrl) {
+            quill.insertEmbed(currentIndex, 'image', fileUrl);
+            currentIndex += 1;
+          }
+          formData.value.images.push({
+            imgName: imageInfo.fileName,
+            thumbnailUrl: imageInfo.thumbnailUrl,
+            imgUrl: imageInfo.fileUrl,
+            imgServiceId: imageInfo.serviceId,
+          });
+        });
+        quill.setSelection(currentIndex);
+      }
+    } catch (error){
+      console.error('이미지 업로드 중 오류 발생', error);
+    }
+  };
+};
 
 const getEditorHTML = () => {
   if (quillInstance.value) {
@@ -68,7 +141,8 @@ const submitForm = async () => {
     const response = await axios.post(BOARD_URL,{
       title: formData.value.title,
       content: formData.value.content,
-      categories: formData.value.categories
+      categories: formData.value.categories,
+      images: formData.value.images,
       },
     { 
       _verifyToken: true
@@ -77,7 +151,8 @@ const submitForm = async () => {
     setTimeout(()=>{
       formData.value.title = '';
       formData.value.content = '';
-      formData.value.categories = null; // 초기화
+      formData.value.categories = null;
+      formData.value.images = [];
       router.push(`/boards/${response.data}`)
     }, 2000)
   } catch (error) {

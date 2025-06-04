@@ -82,32 +82,11 @@
 
     <div
       class="mt-5 bg-gray-100 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-      v-if="post"
+      v-if="boardDetail"
     >
       <h2 class="text-xl font-semibold mb-2">{{ boardDetail.title }}</h2>
       <p class="ql-editor" v-html="boardDetail.content"></p>
 
-      <div v-if="post.files && post.files.length > 0" class="mt-4">
-        <div class="flex space-x-2">
-          <template v-for="(file, index) in imageFiles" :key="index">
-            <img
-              v-if="file.url"
-              :src="file.url"
-              alt="첨부 이미지"
-              class="w-32 h-32 object-cover rounded-md"
-            />
-          </template>
-          <template v-for="(file, index) in otherFiles" :key="`file-${index}`">
-            <a
-              v-if="file.url"
-              :href="file.url"
-              target="_blank"
-              class="text-blue-500 hover:underline"
-              >{{ file.name }}</a
-            >
-          </template>
-        </div>
-      </div>
     </div>
 
     <div class="mt-8">
@@ -202,7 +181,7 @@
 
 <script lang="ts" setup>
 import Breadcrumb from '../../components/AppBreadcrumb.vue';
-import { ref, computed, onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import LevelBadge from '../../components/users/LevelBadge.vue';
 import axios from 'axios';
 import { BOARD_URL } from '@/constants/api';
@@ -218,11 +197,6 @@ const props = defineProps({
     required: true,
   }
 })
-
-interface FileInfo {
-  name: string;
-  url: string;
-}
 
 interface Comment {
   text: string;
@@ -282,41 +256,12 @@ onMounted(() => {
   fetchBoardDetail(props.id);
 });
 
-// 예시 데이터 (실제로는 API 호출 등을 통해 가져와야 합니다.)
-const post = ref({
-  bno: 1,
-  title: '안녕하세요 가입인사 드립니다',
-  name: '코코',
-  content: '<b>이런 커뮤니티가 있는 줄 몰랐는데 정말 좋네요 앞으로 많이 활동하겠습니다!!</b>',
-  viewCnt: 3,
-  createdAt: '2025-04-15 14:17:00',
-  updatedAt: '',
-  files: [
-    { name: 'image1.png', url: 'https://placehold.co/150' },
-    { name: 'image2.jpg', url: 'https://placehold.co/100' },
-  ] as FileInfo[],
-  categories: ['event'],
-});
-
 const newComment = ref('');
 const commentImage = ref<File | null>(null);
 const commentImagePreview = ref<string | null>(null);
 const comments = ref<Comment[]>([]);
 const isFavorite = ref(false);
 const favoriteCount = ref(2); // 초기 즐겨찾기 수
-
-const imageFiles = computed(() => {
-  return post.value?.files?.filter(file => isImage(file.name)) || [];
-});
-
-const otherFiles = computed(() => {
-  return post.value?.files?.filter(file => !isImage(file.name)) || [];
-});
-
-const isImage = (fileName: string): boolean => {
-  const ext = fileName.split('.').pop()?.toLowerCase();
-  return ['jpg', 'jpeg', 'png', 'gif'].includes(ext || '');
-};
 
 const handleCommentImageChange = (event: Event) => {
   const target = event.target as HTMLInputElement;
