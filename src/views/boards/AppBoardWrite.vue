@@ -137,6 +137,23 @@ const getEditorHTML = () => {
 
 const submitForm = async () => {
   getEditorHTML();
+
+  const currentEditorHtml = formData.value.content;
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(currentEditorHtml, 'text/html');
+  const imgTags = doc.querySelectorAll('img');
+  
+  const currentImageUrlsInEditor = new Set<string>();
+  imgTags.forEach(img => {
+    if (img.src) {
+      currentImageUrlsInEditor.add(img.src);
+    }
+  });
+
+  formData.value.images = formData.value.images.filter(info => 
+    currentImageUrlsInEditor.has(info.imgUrl)
+  );
+  
   try {
     const response = await axios.post(BOARD_URL,{
       title: formData.value.title,
