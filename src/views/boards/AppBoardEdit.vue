@@ -97,7 +97,8 @@ const quillOptions = {
     theme: 'snow',
     formats: [
     'width', 
-    'height',  
+    'height',
+    'image'  
   ],
 }
 
