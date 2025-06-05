@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import axios from 'axios';
 import { LOGOUT_URL, REFRESH_URL } from '@/constants/api';
+import { logout, refreshAccessToken } from '@/services/authService';
 
 export const useAuthStore = defineStore('auth', () => {
   // State
@@ -26,7 +27,7 @@ export const useAuthStore = defineStore('auth', () => {
         accessToken.value = null;
         adminId.value = null;
         updateAuthHeader(null);
-        localStorage.removeItem('accessToken');
+        sessionStorage.removeItem('accessToken');
     }
 
     function updateAuthHeader(token: string | null) {
@@ -40,18 +41,18 @@ export const useAuthStore = defineStore('auth', () => {
     function loginSuccess(token: string, id: string) {
         setAccessToken(token);
         setAdminId(id);
-        localStorage.setItem('accessToken', token);
-        localStorage.setItem('id', id);
+        sessionStorage.setItem('accessToken', token);
+        sessionStorage.setItem('id', id);
     }
     
-    async function logout() {
+    async function handleLogout() {
         try {
-            await axios.post(LOGOUT_URL);
+            await logout();
             clearAccessToken();
-            localStorage.removeItem('id');
+            sessionStorage.removeItem('id');
             console.log('로그아웃 완료 및 Access Token, id 제거');
         } catch (error) {
-            localStorage.removeItem('id');
+            sessionStorage.removeItem('id');
             console.error('로그아웃 실패:', error);
             clearAccessToken();
         }
@@ -60,23 +61,18 @@ export const useAuthStore = defineStore('auth', () => {
     // Access Token 갱신 액션
     async function refreshToken() {
         try {
-          const response = await axios.post(REFRESH_URL, null,{
-            withCredentials: true,
-            headers: {
-              Authorization: null
-            }
-          });
-          const newAccessToken = response.data.accessToken;
+          const responseData = await refreshAccessToken();
+          const newAccessToken = responseData.accessToken;
           setAccessToken(newAccessToken);
           console.log('Access Token 갱신 성공');
           return true; // 갱신 성공
         } catch (error) {
           console.error('Access Token 갱신 실패:', error);
           clearAccessToken();
-          localStorage.removeItem('id');
+          sessionStorage.removeItem('id');
           return false; // 갱신 실패
         }
     }
 
-    return { accessToken, isloggedIn, currentAdminId, setAccessToken, setAdminId, clearAccessToken, loginSuccess, logout, refreshToken };
+    return { accessToken, isloggedIn, currentAdminId, setAccessToken, setAdminId, clearAccessToken, loginSuccess, handleLogout, refreshToken };
 });

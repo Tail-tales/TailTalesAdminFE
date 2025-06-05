@@ -165,7 +165,7 @@
 <script setup lang="ts">
 import { useTableData } from '../hooks/useTableData'
 const { paginatedTableData } = useTableData()
-import Breadcrumb from '../partials/AppBreadcrumb.vue'
+import Breadcrumb from '../components/AppBreadcrumb.vue'
 import LevelBadge from '../components/users/LevelBadge.vue'
 import FilterForm from '../components/FilterForm.vue'
 import { ref } from 'vue';

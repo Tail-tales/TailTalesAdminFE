@@ -32,13 +32,12 @@ import { ref, onMounted } from 'vue';
 import toolbarOptions from '@/constants/toolbarOptions';
 import ToastAlert from "@/components/ToastAlert.vue";
 import axios from 'axios';
-import { BOARD_URL, IMAGE_URL } from '@/constants/api';
+import { BOARD_URL, BOARD_EDIT_URL, IMAGE_URL } from '@/constants/api';
 import CategorySelect from '@/components/boards/CategorySelect.vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const toastAlert = ref<InstanceType<typeof ToastAlert> | null >(null);
-
 interface ImageInfo {
   imgName: string;
   thumbnailUrl: string;
@@ -52,16 +51,40 @@ interface ImageRes {
   fileUrl: string;
   serviceId: string;
 }
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
+  }
+})
 
 const formData = ref({
+  bno: 0,
   categories: null as number[] | null,
   title: '',
   content: '',
-  images: [] as ImageInfo[]
+  images: [] as ImageInfo[],
 });
 
 const quillEditorRef = ref<InstanceType<typeof QuillEditor> | null>(null);
 const quillInstance = ref<any | null>(null);
+
+const fetchBoardDetail = async (id: number) => {
+  try {
+    const response = await axios.get(`${BOARD_URL}/${id}`, {
+      _verifyToken: true,
+    });
+    formData.value.bno = response.data.bno;
+    formData.value.title = response.data.title;
+    if (quillInstance.value) {
+      quillInstance.value.root.innerHTML = response.data.content;
+    }
+    formData.value.categories = response.data.categories;
+    formData.value.images = response.data.images;
+  } catch (error) {
+    console.error(`게시글 ${id} 조회 중 오류 발생:`, error);
+  }
+};
 
 const quillOptions = {
   modules: {
@@ -75,7 +98,7 @@ const quillOptions = {
     formats: [
     'width', 
     'height',
-    'image',
+    'image'  
   ],
 }
 
@@ -88,6 +111,7 @@ onMounted(() => {
       console.log('Quill Instance:', quillInstance.value);
     }
   }
+  fetchBoardDetail(props.id);
 });
 
 const ImageUpload = () => {
@@ -117,6 +141,7 @@ const ImageUpload = () => {
       );
 
       const imageUrls = response.data as ImageRes[];
+
 
       if (imageUrls && imageUrls.length > 0) {
         const quill = quillInstance.value;
@@ -169,9 +194,10 @@ const submitForm = async () => {
   formData.value.images = formData.value.images.filter(info => 
     currentImageUrlsInEditor.has(info.imgUrl)
   );
-  
+
   try {
-    const response = await axios.post(BOARD_URL,{
+    const response = await axios.patch(BOARD_EDIT_URL,{
+      bno: formData.value.bno,
       title: formData.value.title,
       content: formData.value.content,
       categories: formData.value.categories,
@@ -180,13 +206,9 @@ const submitForm = async () => {
     { 
       _verifyToken: true
     });
-    toastAlert.value?.show('게시글이 성공적으로 작성되었습니다.', 'success');
+    toastAlert.value?.show('게시글이 성공적으로 수정되었습니다.', 'success');
     setTimeout(()=>{
-      formData.value.title = '';
-      formData.value.content = '';
-      formData.value.categories = null;
-      formData.value.images = [];
-      router.push(`/boards/${response.data}`)
+      router.push(`/boards/${response.data.bno}`)
     }, 2000)
   } catch (error) {
     console.error('게시글 작성 중 오류 발생:', error);

@@ -329,6 +329,6 @@ const { isOpen } = useSidebar();
 const notificationOpen = ref(false);
 
 function logout() {
-  useAuthStore().logout();
+  useAuthStore().handleLogout();
 }
 </script>
