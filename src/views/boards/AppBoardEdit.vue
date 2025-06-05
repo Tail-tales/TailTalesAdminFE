@@ -76,7 +76,9 @@ const fetchBoardDetail = async (id: number) => {
     });
     formData.value.bno = response.data.bno;
     formData.value.title = response.data.title;
-    quillInstance.value.root.innerHTML = response.data.content;
+    if (quillInstance.value) {
+      quillInstance.value.root.innerHTML = response.data.content;
+    }
     formData.value.categories = response.data.categories;
     formData.value.images = response.data.images;
   } catch (error) {
@@ -160,6 +162,23 @@ const getEditorHTML = () => {
 
 const submitForm = async () => {
   getEditorHTML();
+
+  const currentEditorHtml = formData.value.content;
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(currentEditorHtml, 'text/html');
+  const imgTags = doc.querySelectorAll('img');
+  
+  const currentImageUrlsInEditor = new Set<string>();
+  imgTags.forEach(img => {
+    if (img.src) {
+      currentImageUrlsInEditor.add(img.src);
+    }
+  });
+
+  formData.value.images = formData.value.images.filter(info => 
+    currentImageUrlsInEditor.has(info.imgUrl)
+  );
+
   try {
     const response = await axios.patch(BOARD_EDIT_URL,{
       bno: formData.value.bno,

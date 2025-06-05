@@ -219,7 +219,6 @@ interface boardInfo {
   createdAt: string;
   updatedAt: string | null;
   categories: string[]; // 왜 얘는 string이지..?
-  images: ImageInfo[];
 }
 
 const boardDetail = ref<boardInfo | null>(null)
