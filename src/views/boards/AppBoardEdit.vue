@@ -15,7 +15,7 @@
         <input type="text" id="title" v-model="formData.title" placeholder="제목을 입력하세요" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
       </div>
       <div class="shadow appearance-none border rounded w-full 2xl:h-72 md:h-64 py-3 px-3 bg-white">
-        <div class="md:h-4/6 2xl:h-5/6"><QuillEditor :toolbar="toolbarOptions" theme="snow" v-model="formData.content" ref="quillEditorRef"/></div>
+        <div class="md:h-4/6 2xl:h-5/6"><QuillEditor :options="quillOptions" v-model="formData.content" ref="quillEditorRef"/></div>
       </div>
       <div class="flex justify-end space-x-2">
         <button type="submit" class="px-4 py-2 font-medium tracking-wide text-white capitalize transition-colors duration-200 transform bg-indigo-600 rounded-md hover:bg-indigo-500 focus:outline-none focus:bg-indigo-500">완료</button>
@@ -85,6 +85,21 @@ const fetchBoardDetail = async (id: number) => {
     console.error(`게시글 ${id} 조회 중 오류 발생:`, error);
   }
 };
+
+const quillOptions = {
+  modules: {
+    imageActions: {}, 
+    imageFormats: {}, 
+    toolbar: {
+    container: toolbarOptions.value,
+    },
+    },
+    theme: 'snow',
+    formats: [
+    'width', 
+    'height',  
+  ],
+}
 
 onMounted(() => {
   if (quillEditorRef.value) {

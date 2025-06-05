@@ -10,6 +10,12 @@ import { QuillEditor } from "@vueup/vue-quill";
 import '@vueup/vue-quill/dist/vue-quill.snow.css';
 import { useAuthStore } from "./stores/auth";
 import setupAxiosInterceptors from "./axiosInterceptor";
+import { Quill } from "@vueup/vue-quill";
+import { ImageActions } from "@xeger/quill-image-actions";
+import { ImageFormats } from "@xeger/quill-image-formats";
+
+Quill.register('modules/imageActions', ImageActions);
+Quill.register('modules/imageFormats', ImageFormats);
 
 const pinia = createPinia();
 const app = createApp(App);

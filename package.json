@@ -9,6 +9,8 @@
   },
   "dependencies": {
     "@vueup/vue-quill": "^1.2.0",
+    "@xeger/quill-image-actions": "^0.7.2",
+    "@xeger/quill-image-formats": "^0.7.2",
     "autoprefixer": "^10",
     "axios": "^1.8.4",
     "core-js": "^3.8.3",
