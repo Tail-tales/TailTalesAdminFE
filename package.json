@@ -9,6 +9,8 @@
   },
   "dependencies": {
     "@vueup/vue-quill": "^1.2.0",
+    "@xeger/quill-image-actions": "^0.7.2",
+    "@xeger/quill-image-formats": "^0.7.2",
     "autoprefixer": "^10",
     "axios": "^1.8.4",
     "core-js": "^3.8.3",
@@ -18,8 +20,7 @@
     "vue": "^3.2.13",
     "vue-class-component": "^8.0.0-0",
     "vue-router": "^4.0.3",
-    "vue3-apexcharts": "^1.4.1",
-    "vuedraggable": "^4.1.0"
+    "vue3-apexcharts": "^1.4.1"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.4.0",

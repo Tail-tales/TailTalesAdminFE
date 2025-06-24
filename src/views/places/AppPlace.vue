@@ -106,7 +106,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import Breadcrumb from '../../partials/AppBreadcrumb.vue'
+import Breadcrumb from '../../components/AppBreadcrumb.vue'
 import { useTableData } from '../../hooks/useTableData'
 import { ref } from 'vue';
 import FilterForm from '@/components/FilterForm.vue';

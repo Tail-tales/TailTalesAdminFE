@@ -6,7 +6,7 @@
         <span class="text-2xl font-semibold text-gray-700">TailTales</span>
       </div>
 
-      <form class="mt-4" @submit.prevent="signup">
+      <form class="mt-4" @submit.prevent="handleSignup">
         <label class="block">
           <span class="text-sm text-gray-700 font-bold">Name</span>
           <input
@@ -201,9 +201,9 @@
 <script setup lang="ts">
   import { ref, watch } from "vue";
   import { useRouter } from "vue-router";
-  import axios, { AxiosError } from "axios";
   import ToastAlert from "@/components/ToastAlert.vue";
-  import { ADMIN_URL, ID_CHECK_URL, EMAIL_CHECK_URL } from "@/constants/api";
+  import { signup, idCheck, emailCheck } from "@/services/authService";
+import { AxiosError } from "axios";
 
   const router = useRouter();
   const toastAlert = ref<InstanceType<typeof ToastAlert> | null >(null);
@@ -279,17 +279,17 @@
     }
 
     try{
-      const response = await axios.get(`${ID_CHECK_URL}/${id.value}`)
+      const responseData = await idCheck(id.value)
 
-      if ( response.data ) {
+      if ( responseData ) {
         errors.value.id = "이미 사용 중인 아이디입니다.";
         idCheckResult.value = false; 
       } else{
         errors.value.id = "사용 가능한 아이디입니다.";
         idCheckResult.value = true; 
       }
-    }catch(error){
-      toastAlert.value?.show('아이디 중복검사 중 오류가 발생했습니다.', 'error');
+    }catch(error: AxiosError){
+      toastAlert.value?.show(error.response.data.message, 'error');
     }
   };
 
@@ -299,19 +299,19 @@
       emailCheckResult.value = false;
       return;
     }
-
+    
     try{
-      const response = await axios.get(`${EMAIL_CHECK_URL}/${email.value}`)
+      const responseData = await emailCheck(email.value)
 
-      if ( response.data ) {
+      if ( responseData ) {
         errors.value.email = "이미 사용 중인 이메일입니다.";
         emailCheckResult.value = false; 
       } else{
         errors.value.email = "사용 가능한 이메일입니다.";
         emailCheckResult.value = true; 
       }
-    }catch(error){
-      toastAlert.value?.show('이메일 중복검사 중 오류가 발생했습니다.', 'error');
+    }catch(error: AxiosError){
+      toastAlert.value?.show(error.response.data.message, 'error');
     }
   };
 
@@ -325,7 +325,7 @@
   watch(email, (newValue) => validateField('email', newValue));
   watch(phoneNumber, (newValue) => validateField('phoneNumber', newValue));
 
-  async function signup() {
+  async function handleSignup() {
     // 폼 제출 시 최종 유효성 검사
     for (const key in rules) {
       validateField(key as RuleKeys, refs[key as RuleKeys].value);
@@ -335,25 +335,21 @@
 
     if (!hasErrors && idCheckResult.value) {
       try {
-        const response = await axios.post(ADMIN_URL,{
+        const responseData = await signup({
           name : name.value,
           id : id.value,
           password: password.value,
           contact: phoneNumber.value,
           email : email.value
         })
-        if( response.status === 200 ){
-          toastAlert.value?.show('회원가입이 완료되었습니다.', 'success');
-          setTimeout(()=>{
-            router.push("/")
-          }, 3000)
-        }
+
+        toastAlert.value?.show(responseData, 'success');
+        setTimeout(()=>{
+          router.push("/")
+        }, 3000)
+        
       } catch (error: AxiosError) {
-        if (error.response.status === 500) {
         toastAlert.value?.show(error.response.data.message, 'error');
-      } else {
-        toastAlert.value?.show('회원가입 요청 중 오류가 발생했습니다.', 'error');
-      }
       }
   } else if (!idCheckResult.value && id.value && errors.value.id !== "아이디를 입력해주세요.") {
     errors.value.id = "중복 확인을 해주세요.";
