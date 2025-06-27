@@ -18,7 +18,20 @@
         <div class="md:h-4/6 2xl:h-5/6"><QuillEditor :options="quillOptions" v-model="formData.content" ref="quillEditorRef"/></div>
       </div>
       <div class="flex justify-end space-x-2">
-        <button type="submit" class="px-4 py-2 font-medium tracking-wide text-white capitalize transition-colors duration-200 transform bg-indigo-600 rounded-md hover:bg-indigo-500 focus:outline-none focus:bg-indigo-500">완료</button>
+        <button type="submit"
+          class="px-4 py-2 font-medium tracking-wide text-white capitalize transition-colors duration-200 transform bg-indigo-600 rounded-md hover:bg-indigo-500 focus:outline-none focus:bg-indigo-500"
+          :disabled="isLoading"
+          style="min-width: 64.8px ; min-height: 40px;"
+          >
+          <div v-show="isLoading">
+            <div class="absolute inset-0 flex items-center justify-center">
+              <div
+                class="w-5 h-5 rounded-full border-4 border-gray-200 border-b-4 border-b-indigo-500 animate-spin relative"
+              ></div>
+            </div>
+         </div>
+          <div v-show="!isLoading">수정</div>
+        </button>
       </div>
     </form>
   </div>
@@ -38,6 +51,8 @@ import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const toastAlert = ref<InstanceType<typeof ToastAlert> | null >(null);
+const isLoading = ref(false);
+
 interface ImageInfo {
   imgName: string;
   thumbnailUrl: string;
@@ -105,69 +120,9 @@ const quillOptions = {
 onMounted(() => {
   if (quillEditorRef.value) {
     quillInstance.value = quillEditorRef.value.getQuill();
-    
-    if (quillInstance.value) {
-      quillInstance.value.getModule('toolbar').addHandler('image', ImageUpload);
-      console.log('Quill Instance:', quillInstance.value);
-    }
   }
   fetchBoardDetail(props.id);
 });
-
-const ImageUpload = () => {
-  const input = document.createElement('input');
-  input.setAttribute('type', 'file');
-  input.setAttribute('accept', 'image/*');
-  input.setAttribute('multiple', 'true');
-  input.click();
-
-  input.onchange = async () => {
-    if (!input.files || input.files.length === 0) return;
-
-    const uploadImageData = new FormData();
-
-    for (let i = 0; i < input.files.length; i++){
-      uploadImageData.append('files', input.files[i]);
-    }
-
-    try {
-      const response = await axios.post(IMAGE_URL,
-        uploadImageData,
-        {
-          headers: {
-            'Content-Type' : 'multipart/form-data'
-          }
-        }
-      );
-
-      const imageUrls = response.data as ImageRes[];
-
-
-      if (imageUrls && imageUrls.length > 0) {
-        const quill = quillInstance.value;
-        const range = quill.getSelection(true);
-        let currentIndex = range.index;
-
-        imageUrls.forEach((imageInfo) => {
-          const fileUrl = imageInfo.fileUrl;
-          if (fileUrl) {
-            quill.insertEmbed(currentIndex, 'image', fileUrl);
-            currentIndex += 1;
-          }
-          formData.value.images.push({
-            imgName: imageInfo.fileName,
-            thumbnailUrl: imageInfo.thumbnailUrl,
-            imgUrl: imageInfo.fileUrl,
-            imgServiceId: imageInfo.serviceId,
-          });
-        });
-        quill.setSelection(currentIndex);
-      }
-    } catch (error){
-      console.error('이미지 업로드 중 오류 발생', error);
-    }
-  };
-};
 
 const getEditorHTML = () => {
   if (quillInstance.value) {
@@ -177,36 +132,35 @@ const getEditorHTML = () => {
 };
 
 const submitForm = async () => {
+  isLoading.value = true;
   getEditorHTML();
 
-  const currentEditorHtml = formData.value.content;
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(currentEditorHtml, 'text/html');
-  const imgTags = doc.querySelectorAll('img');
-  
-  const currentImageUrlsInEditor = new Set<string>();
-  imgTags.forEach(img => {
-    if (img.src) {
-      currentImageUrlsInEditor.add(img.src);
-    }
-  });
+ let processedHtmlContent = formData.value.content;
+  let finalUploadedImageInfos: ImageInfo[] = [];
 
-  formData.value.images = formData.value.images.filter(info => 
-    currentImageUrlsInEditor.has(info.imgUrl)
-  );
+  try {
+    const imageProcessResult = await processImagesInContent(formData.value.content);
+    processedHtmlContent = imageProcessResult.processedHtml;
+    finalUploadedImageInfos = imageProcessResult.uploadedImageInfos;
+  } catch (error) {
+    console.error('게시글 이미지 처리 중 오류 발생:', error);
+    toastAlert.value?.show('게시글 이미지 처리 중 오류가 발생했습니다.', 'error');
+    return;
+  }
 
   try {
     const response = await axios.patch(BOARD_EDIT_URL,{
       bno: formData.value.bno,
       title: formData.value.title,
-      content: formData.value.content,
+      content: processedHtmlContent,
       categories: formData.value.categories,
-      images: formData.value.images,
+      images: finalUploadedImageInfos,
       },
     { 
       _verifyToken: true
     });
     toastAlert.value?.show('게시글이 성공적으로 수정되었습니다.', 'success');
+    isLoading.value = false;
     setTimeout(()=>{
       router.push(`/boards/${response.data.bno}`)
     }, 2000)
@@ -215,4 +169,74 @@ const submitForm = async () => {
     toastAlert.value?.show('게시글 작성 중 오류가 발생했습니다.', 'error');
   }
 };
+
+async function processImagesInContent(htmlContent: string): Promise<{ processedHtml: string, uploadedImageInfos: ImageInfo[] }> {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(htmlContent, 'text/html');
+  const imgTags = doc.querySelectorAll('img');
+
+  const uploadImageData = new FormData();
+  const base64ImageMap = new Map<string, string>();
+
+  let imageCounter = 0;
+  for (const img of Array.from(imgTags)) {
+    const src = img.getAttribute('src');
+    if (src && src.startsWith('data:image/')) {
+      const filename = `image_${Date.now()}_${imageCounter++}.${src.substring(src.indexOf('/') + 1, src.indexOf(';'))}`;
+
+      const blob = dataURLtoBlob(src);
+      uploadImageData.append('files', blob, filename);
+      base64ImageMap.set(src, filename);
+    }
+  }
+
+  let uploadedImageRes: ImageRes[] = [];
+  if (Array.from(uploadImageData.entries()).length > 0) { 
+    try {
+      const imageResponse = await axios.post(IMAGE_URL, uploadImageData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        },
+        _verifyToken: true
+      });
+      uploadedImageRes = imageResponse.data as ImageRes[];
+    } catch (imageUploadError) {
+      console.error('이미지 업로드 중 오류 발생:', imageUploadError);
+      throw new Error('Failed to upload images.');
+    }
+  }
+
+  let processedHtml = htmlContent;
+  const finalImageInfos: ImageInfo[] = [];
+
+  for (const [base64Url, tempFilename] of base64ImageMap.entries()) {
+    const correspondingUploadedImg = uploadedImageRes.find(res => res.fileName === tempFilename);
+
+    if (correspondingUploadedImg) {
+      processedHtml = processedHtml.replace(base64Url, correspondingUploadedImg.fileUrl);
+      finalImageInfos.push({
+        imgName: correspondingUploadedImg.fileName,
+        thumbnailUrl: correspondingUploadedImg.thumbnailUrl,
+        imgUrl: correspondingUploadedImg.fileUrl,
+        imgServiceId: correspondingUploadedImg.serviceId,
+      });
+    }
+  }
+
+  return { processedHtml, uploadedImageInfos: finalImageInfos };
+}
+
+function dataURLtoBlob(dataurl: string): Blob {
+    const arr = dataurl.split(',');
+    const mimeMatch = arr[0].match(/:(.*?);/);
+    if (!mimeMatch) throw new Error('Invalid data URL');
+    const mime = mimeMatch[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while(n--){
+        u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new Blob([u8arr], {type:mime});
+}
 </script>
